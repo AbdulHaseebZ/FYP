@@ -1,0 +1,65 @@
+{
+  "inverter_model": "Solis RHI-1P3~6K-48ES-5G | 3~6kW | Single Phase | Hybrid Inverter",
+  "protocol_reference": "RS485_MODBUS-Hybrid-BACoghlan-201811228-1854.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power low", "register": "33057", "scaling": 1, "unit": "W" },
+        { "name": "PV Power high", "register": "33058", "scaling": 1, "unit": "W" },
+        { "name": "PV Power 1 low", "register": "33049", "scaling": "V×I×0.1", "unit": "W" },
+        { "name": "PV Power 1 high", "register": "33050", "scaling": "V×I×0.1", "unit": "W" },
+        { "name": "PV Power 2 low", "register": "33051", "scaling": "V×I×0.1", "unit": "W" },
+        { "name": "PV Power 2 high", "register": "33052", "scaling": "V×I×0.1", "unit": "W" },
+        { "name": "Battery Power low", "register": "33149", "scaling": 1, "unit": "W" },
+        { "name": "Battery Power high", "register": "33150", "scaling": 1, "unit": "W" },
+        { "name": "Active Power low", "register": "33079", "scaling": 1, "unit": "W" },
+        { "name": "Active Power high", "register": "33080", "scaling": 1, "unit": "W" },
+        { "name": "Reactive Power low", "register": "33081", "scaling": 1, "unit": "var" },
+        { "name": "Reactive Power high", "register": "33082", "scaling": 1, "unit": "var" },
+        { "name": "Apparent Power low", "register": "33083", "scaling": 1, "unit": "VA" },
+        { "name": "Apparent Power high", "register": "33084", "scaling": 1, "unit": "VA" },
+        { "name": "House Load Power", "register": "33147", "scaling": 1, "unit": "W" },
+        { "name": "Backup Load Power", "register": "33148", "scaling": 1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "33049", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "33051", "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": "33133", "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 1", "register": "33073", "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 2", "register": "33074", "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 3", "register": "33075", "scaling": 0.1, "unit": "V" },
+        { "name": "DC Bus Voltage", "register": "33071", "scaling": 0.1, "unit": "V" },
+        { "name": "Meter AC Voltage 1", "register": "33251", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "33050", "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 2", "register": "33052", "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Current", "register": "33134", "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 1", "register": "33076", "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 2", "register": "33077", "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 3", "register": "33078", "scaling": 0.1, "unit": "A" },
+        { "name": "Meter AC Current 1", "register": "33252", "scaling": 0.01, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "33093", "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "33094", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Meter Grid Frequency", "register": "33282", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

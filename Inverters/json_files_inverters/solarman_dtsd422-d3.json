@@ -1,0 +1,54 @@
+{
+  "inverter_model": "Solarman DTSD422-D3 | Energy Meter | Three Phase",
+  "protocol_reference": "https://github.com/user-attachments/files/17587006/Solarman.DTSD422-D3_modbus_1730182189251_mwaox_CN.xlsx",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "CT1-3 Active Power", "register": "0x000D", "scaling": 1, "unit": "W" },
+        { "name": "CT1 Active Power", "register": "0x000F", "scaling": 1, "unit": "W" },
+        { "name": "CT2 Active Power", "register": "0x0011", "scaling": 1, "unit": "W" },
+        { "name": "CT3 Active Power", "register": "0x0013", "scaling": 1, "unit": "W" },
+        { "name": "CT4-6 Active Power", "register": "0x100D", "scaling": 1, "unit": "W" },
+        { "name": "CT4 Active Power", "register": "0x100F", "scaling": 1, "unit": "W" },
+        { "name": "CT5 Active Power", "register": "0x1011", "scaling": 1, "unit": "W" },
+        { "name": "CT6 Active Power", "register": "0x1013", "scaling": 1, "unit": "W" },
+        { "name": "CT1-3 Reactive Power", "register": "0x0015", "scaling": 1, "unit": "var" },
+        { "name": "CT1-3 Apparent Power", "register": "0x001D", "scaling": 1, "unit": "VA" },
+        { "name": "CT1-3 Total Positive Energy", "register": "0x002A", "scaling": 0.01, "unit": "kWh" },
+        { "name": "CT1-3 Total Negative Energy", "register": "0x0034", "scaling": 0.01, "unit": "kWh" },
+        { "name": "CT4-6 Total Positive Energy", "register": "0x102A", "scaling": 0.01, "unit": "kWh" },
+        { "name": "CT4-6 Total Negative Energy", "register": "0x1034", "scaling": 0.01, "unit": "kWh" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "CT1 Voltage", "register": "0x0001", "scaling": 0.1, "unit": "V" },
+        { "name": "CT2 Voltage", "register": "0x0002", "scaling": 0.1, "unit": "V" },
+        { "name": "CT3 Voltage", "register": "0x0003", "scaling": 0.1, "unit": "V" },
+        { "name": "CT4 Voltage", "register": "0x1001", "scaling": 0.1, "unit": "V" },
+        { "name": "CT5 Voltage", "register": "0x1002", "scaling": 0.1, "unit": "V" },
+        { "name": "CT6 Voltage", "register": "0x1003", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "CT1 Current", "register": "0x0007", "scaling": 0.001, "unit": "A" },
+        { "name": "CT2 Current", "register": "0x0009", "scaling": 0.001, "unit": "A" },
+        { "name": "CT3 Current", "register": "0x000B", "scaling": 0.001, "unit": "A" },
+        { "name": "CT4 Current", "register": "0x1007", "scaling": 0.001, "unit": "A" },
+        { "name": "CT5 Current", "register": "0x1009", "scaling": 0.001, "unit": "A" },
+        { "name": "CT6 Current", "register": "0x100B", "scaling": 0.001, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "CT1-3 Frequency", "register": "0x0029", "scaling": 0.01, "unit": "Hz" },
+        { "name": "CT4-6 Frequency", "register": "0x1029", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

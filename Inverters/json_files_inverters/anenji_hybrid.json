@@ -1,0 +1,51 @@
+{
+  "inverter_model": "ANENJI Hybrid Inverter",
+  "protocol_reference": " https://github.com/user-attachments/files/20907869/RS232.Communication.Protocol.V1.0-220209.pdf
+#",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Grid Average Power", "register": "204", "scaling": 1, "unit": "W" },
+        { "name": " Inverter Average Power", "register": "208", "scaling": 1, "unit": "W" },
+        { "name": "Output active power", "register": "213", "scaling": 1, "unit": "W" },
+        { "name": "Output apparent power", "register": "214", "scaling": 1, "unit": "VA" },
+        { "name": "Battery average power", "register": "217", "scaling": 1, "unit": "W" },
+        { "name": "PV average power", "register": "223", "scaling": 1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Grid voltage", "register": "202", "scaling": 0.1, "unit": "V" },
+        { "name": "Inverter voltage", "register": "205", "scaling": 0.1, "unit": "V" },
+        { "name": "Output voltage", "register": "210", "scaling": 0.1, "unit": "V" },
+        { "name": "Battery average voltage", "register": "215", "scaling": 0.1, "unit": "V" },
+        { "name": "PV average voltage", "register": "219", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Inverter current", "register": "206", "scaling": 0.1, "unit": "A" },
+        { "name": "Output current", "register": "211", "scaling": 0.1, "unit": "A" },
+        { "name": "Battery average current", "register": "216", "scaling": 0.1, "unit": "A" },
+        { "name": "PV average current", "register": "220", "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "227", "scaling": 1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "203", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Inverter frequency", "register": "207", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Output frequency", "register": "212", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

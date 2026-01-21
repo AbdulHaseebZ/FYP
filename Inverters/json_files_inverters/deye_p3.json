@@ -1,0 +1,85 @@
+{
+"inverter_model": "Three Phase Hybrid Inverter (Modbus RTU V105.1)",
+"pdf_reference": "https://github.com/user-attachments/files/16798469/MODBUS.RTU.V105.1-20231006.pdf and https://github.com/user-attachments/files/16597916/MODBUSRTU.V104.3.1.1111_SG01-HP3-AM2.pdf",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "PV input power 1", "register": 672, "scaling": 1, "unit": "W" },
+{ "name": "Max Solar Power", "register": 340, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output total power Low", "register": 636, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 1 Low", "register": 633, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 1 high", "register": 691, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 2 Low", "register": 634, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 2 high", "register": 692, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 3 Low", "register": 635, "scaling": 1, "unit": "W" },
+{ "name": "Inverter output power 3 high", "register": 693, "scaling": 1, "unit": "W" },
+{ "name": "Inverter total power high", "register": 694, "scaling": 1, "unit": "W" },
+{ "name": "Inverter total apparent power Low", "register": 637, "scaling": 1, "unit": "VA" },
+{ "name": "Inverter total apparent power high", "register": 695, "scaling": 1, "unit": "VA" },
+{ "name": "Battery Power", "register": 590, "scaling": 1, "unit": "W" },
+{ "name": "PV Power", "register": 529, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total PV power low", "register": 534, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total PV power high", "register": 535, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Grid Power", "register": 520, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Grid Sell Power", "register": 521, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Today charge of the battery", "register": 514, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Today discharge of the battery", "register": 515, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total charge of the battery low", "register": 516, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total charge of the battery high", "register": 517, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total discharge of the battery low", "register": 518, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total discharge of the battery high", "register": 519, "scaling": 0.1, "unit": "kWh" }
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "PV Voltage 1", "register": 676, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 2", "register": 678, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 3", "register": 680, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 4", "register": 682, "scaling": 0.1, "unit": "V" },
+{ "name": "Battery Voltage 1", "register": 587, "scaling": 0.01, "unit": "V" },
+{ "name": "Battery Voltage 2", "register": 593, "scaling": 0.01, "unit": "V" },
+{ "name": "Inverter phase voltage 1", "register": 627, "scaling": 0.1, "unit": "V" },
+{ "name": "Inverter phase voltage 2", "register": 628, "scaling": 0.1, "unit": "V" },
+{ "name": "Inverter phase voltage 3", "register": 629, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 1", "register": 598, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 2", "register": 599, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 3", "register": 600, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Vol High", "register": 185, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Vol Low", "register": 186, "scaling": 0.1, "unit": "V" }
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "PV Current 1", "register": 677, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 2", "register": 679, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 3", "register": 681, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 4", "register": 683, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current 1", "register": 617, "scaling": 0.01, "unit": "A" },
+{ "name": "Grid Current 2", "register": 618, "scaling": 0.01, "unit": "A" },
+{ "name": "Grid Current 3", "register": 619, "scaling": 0.01, "unit": "A" },
+{ "name": "Battery Current 1", "register": 591, "scaling": 0.01, "unit": "A" },
+{ "name": "Battery Current 2", "register": 594, "scaling": 0.01, "unit": "A" }
+]
+},
+{
+"category": "Temperature",
+"parameters": [
+{ "name": "Battery Temperature 1", "register": 586, "scaling": 0.1, "unit": "°C" },
+{ "name": "Battery Temperature 2", "register": 596, "scaling": 0.1, "unit": "°C" },
+{ "name": "Inverter Temperature", "register": 541, "scaling": 0.1, "unit": "°C" },
+{ "name": "Transformer Temperature", "register": 540, "scaling": 0.1, "unit": "°C" }
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Grid Frequency", "register": 609, "scaling": 0.01, "unit": "Hz" },
+{ "name": "Inverter Frequency", "register": 638, "scaling": 0.01, "unit": "Hz" },
+{ "name": "Load Frequency", "register": 655, "scaling": 0.01, "unit": "Hz" }
+]
+}
+]
+}

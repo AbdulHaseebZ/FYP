@@ -1,0 +1,56 @@
+{
+"inverter_model": "Deye String/Hybrid Inverter (Modbus RTU)",
+"protocol_reference": "Deye.Modbus.protocol.V118.pdf",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "Output Power low", "register": 86, "scaling": 0.1, "unit": "W" },
+{ "name": "Output Power high", "register": 87, "scaling": 0.1, "unit": "W" },
+{ "name": "Input Power low", "register": 82, "scaling": 0.1, "unit": "W" },
+{ "name": "Input Power high", "register": 83, "scaling": 0.1, "unit": "W" },
+{ "name": "Total Production low", "register": 63, "scaling": 0.1, "unit": "kWh" },
+{ "name": "Total Production high", "register": 64, "scaling": 0.1, "unit": "kWh" }
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "PV Voltage 1", "register": 109, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 2", "register": 111, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 3", "register": 113, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 4", "register": 115, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 1", "register": 73, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 2", "register": 74, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 3", "register": 75, "scaling": 0.1, "unit": "V" },
+{ "name": "Battery Voltage", "register": 183, "scaling": 0.01, "unit": "V" }
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "PV Current 1", "register": 110, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 2", "register": 112, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 3", "register": 114, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 4", "register": 116, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current 1", "register": 76, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current 2", "register": 77, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current 3", "register": 78, "scaling": 0.1, "unit": "A" },
+{ "name": "Battery Current", "register": 191, "scaling": 0.01, "unit": "A" }
+]
+},
+{
+"category": "Temperature",
+"parameters": [
+{ "name": "Inverter Temperature", "register": 91, "scaling": 0.1, "unit": "°C" },
+{ "name": "Transformer Temperature", "register": 90, "scaling": 0.1, "unit": "°C" }
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Grid Frequency", "register": 79, "scaling": 0.01, "unit": "Hz" }
+]
+}
+]
+}

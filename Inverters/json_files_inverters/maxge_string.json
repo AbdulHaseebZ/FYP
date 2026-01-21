@@ -1,0 +1,41 @@
+{
+"inverter_model": "MAXGE (RETELEC) MGEA6KSI11 | String Inverter",
+"protocol_reference": "Not specified in provided data",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "PV Power low", "register": 268, "scaling": 1, "unit": "W", "rule": 3 },
+{ "name": "PV Power high", "register": 269, "scaling": 1, "unit": "W", "rule": 3 },
+{ "name": "PV Power 1 low", "register": 518, "scaling": 0.1, "unit": "W", "rule": 1 },
+{ "name": "PV Power 1 high", "register": 519, "scaling": 0.1, "unit": "W", "rule": 1 },
+{ "name": "PV Power 2 low", "register": 525, "scaling": 0.1, "unit": "W", "rule": 1 },
+{ "name": "PV Power 2 high", "register": 526, "scaling": 0.1, "unit": "W", "rule": 1 },
+{ "name": "Total Production low", "register": 273, "scaling": 0.1, "unit": "kWh", "rule": 3 },
+{ "name": "Total Production high", "register": 274, "scaling": 0.1, "unit": "kWh", "rule": 3 }
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "Load Voltage", "register": 264, "scaling": 0.1, "unit": "V", "rule": 1 },
+{ "name": "PV Voltage 1", "register": 518, "scaling": 0.1, "unit": "V", "rule": 1 },
+{ "name": "PV Voltage 2", "register": 525, "scaling": 0.1, "unit": "V", "rule": 1 }
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "Load Current", "register": 258, "scaling": 0.1, "unit": "A", "rule": 1 },
+{ "name": "PV Current 1", "register": 519, "scaling": 0.1, "unit": "A", "rule": 1 },
+{ "name": "PV Current 2", "register": 526, "scaling": 0.1, "unit": "A", "rule": 1 }
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Load Frequency", "register": 267, "scaling": 0.01, "unit": "Hz", "rule": 1 }
+]
+}
+]
+}

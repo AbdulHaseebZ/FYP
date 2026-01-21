@@ -1,0 +1,52 @@
+{
+  "inverter_model": "AFORE T4 Three-Phase Inverter (Modbus RTU)",
+  "protocol_reference": "https://github.com/user-attachments/files/17586963/MODBUS.RTU.for.3.phase.inverters.AFORE.T4.protcol.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Grid Power (High)", "register": 18, "scaling": 1, "unit": "W" },
+        { "name": "Grid Power (Low)", "register": 19, "scaling": 1, "unit": "W" },
+        { "name": "Today's Energy (High)", "register": 16, "scaling": 1, "unit": "Wh" },
+        { "name": "Today's Energy (Low)", "register": 17, "scaling": 1, "unit": "Wh" },
+        { "name": "Total Energy (High)", "register": 22, "scaling": 1, "unit": "Wh" },
+        { "name": "Total Energy (Low)", "register": 23, "scaling": 1, "unit": "Wh" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Grid Voltage 1", "register": 1, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": 2, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": 3, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 1", "register": 7, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": 9, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 3", "register": 11, "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Grid Current 1", "register": 4, "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 2", "register": 5, "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 3", "register": 6, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 1", "register": 8, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 2", "register": 10, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 3", "register": 12, "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Module Temperature", "register": 14, "scaling": 0.1, "unit": "°C" },
+        { "name": "Inverter Temperature", "register": 15, "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": 13, "scaling": 0.1, "unit": "Hz" }
+      ]
+    }
+  ]
+}

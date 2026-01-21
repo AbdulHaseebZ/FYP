@@ -1,0 +1,53 @@
+{
+"inverter_model": "Swatten SiH-5/6/8/10kW-TH | Three Phase Hybrid Inverter | HV Battery Supported",
+"protocol_reference": "Swatten.inverter.Modbus.table.xlsx",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "PV Power", "register": "0x0FE3", "scaling": 1, "unit": "W"},
+{ "name": "AC Output Power", "register": "0x0FF1", "scaling": 1, "unit": "W"},
+{ "name": "Reactive Power", "register": "0x0FF3", "scaling": 1, "unit": "var"},
+{ "name": "Apparent Power", "register": "0x0FDB", "scaling": 1, "unit": "VA"},
+{ "name": "Real-time feeder power", "register": "0x1519", "scaling": 1, "unit": "W"},
+{ "name": "Load Power", "register": "0x2718", "scaling": 1, "unit": "W"},
+{ "name": "Battery Power", "register": "0x2726", "scaling": 1, "unit": "W"}
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "PV Voltage 1", "register": "0x0FDD", "scaling": 0.1, "unit": "V"},
+{ "name": "PV Voltage 2", "register": "0x0FDF", "scaling": 0.1, "unit": "V"},
+{ "name": "Grid Voltage 1", "register": "0x0FE5", "scaling": 0.1, "unit": "V"},
+{ "name": "Grid Voltage 2", "register": "0x0FE6", "scaling": 0.1, "unit": "V"},
+{ "name": "Grid Voltage 3", "register": "0x0FE7", "scaling": 0.1, "unit": "V"},
+{ "name": "Battery Voltage", "register": "0x2724", "scaling": 0.1, "unit": "V"}
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "PV Current 1", "register": "0x0FDE", "scaling": 0.1, "unit": "A"},
+{ "name": "PV Current 2", "register": "0x0FE0", "scaling": 0.1, "unit": "A"},
+{ "name": "Grid Current 1", "register": "0x0FE8", "scaling": 0.1, "unit": "A"},
+{ "name": "Grid Current 2", "register": "0x0FE9", "scaling": 0.1, "unit": "A"},
+{ "name": "Grid Current 3", "register": "0x0FEA", "scaling": 0.1, "unit": "A"},
+{ "name": "Battery Current", "register": "0x2725", "scaling": 0.1, "unit": "A"}
+]
+},
+{
+"category": "Temperature",
+"parameters": [
+{ "name": "Inverter Temperature", "register": "0x0FDA", "scaling": 0.1, "unit": "°C"},
+{ "name": "Battery Temperature", "register": "0x2729", "scaling": 0.1, "unit": "°C"}
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Grid Frequency", "register": "0x1066", "scaling": 0.01, "unit": "Hz"}
+]
+}
+]
+}

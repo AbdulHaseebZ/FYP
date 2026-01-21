@@ -1,0 +1,109 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_log.h"
+#include "driver/rmt_tx.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#define EXAMPLE_IR_RESOLUTION_HZ     1000000 // 1MHz resolution, 1 tick = 1us
+#define EXAMPLE_IR_TX_GPIO_NUM       18
+#define SYMBOL_COUNT                 68
+
+// NEC timing specifications (in microseconds)
+#define NEC_LEADING_CODE_DURATION_0      2500
+#define NEC_LEADING_CODE_DURATION_1      1000
+#define NEC_PAYLOAD_ZERO_DURATION_0       300
+#define NEC_PAYLOAD_ZERO_DURATION_1       400
+#define NEC_PAYLOAD_ONE_DURATION_0        300
+#define NEC_PAYLOAD_ONE_DURATION_1        900
+#define NEC_CONNECTING_CODE1_DURATION_0   300
+#define NEC_CONNECTING_CODE1_DURATION_1   16300
+#define NEC_CONNECTING_CODE2_DURATION_0   2002
+#define NEC_CONNECTING_CODE2_DURATION_1   0
+
+static const char *TAG = "example";
+
+// Hardcoded data string
+static char tx_data[] = "1001100000011000000000000001000000100000010100000000100010001101";
+
+// Append connecting codes for transmitter
+static void append_connecting_codes(rmt_symbol_word_t *items, int *idx) {
+    items[(*idx)++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_CONNECTING_CODE1_DURATION_0,
+        .level1 = 0, .duration1 = NEC_CONNECTING_CODE1_DURATION_1
+    };
+    items[(*idx)++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_CONNECTING_CODE2_DURATION_0,
+        .level1 = 0, .duration1 = NEC_CONNECTING_CODE2_DURATION_1
+    };
+}
+
+// Build transmitter waveform
+static int build_items(rmt_symbol_word_t *items, size_t max_items) {
+    int idx = 0;
+    // Leading code
+    items[idx++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_LEADING_CODE_DURATION_0,
+        .level1 = 0, .duration1 = NEC_LEADING_CODE_DURATION_1
+    };
+    // Payload bits
+    for (int i = 0; tx_data[i] != '\0'; i++) {
+        if (tx_data[i] == '0') {
+            items[idx++] = (rmt_symbol_word_t) {
+                .level0 = 1, .duration0 = NEC_PAYLOAD_ZERO_DURATION_0,
+                .level1 = 0, .duration1 = NEC_PAYLOAD_ZERO_DURATION_1
+            };
+        } else if (tx_data[i] == '1') {
+            items[idx++] = (rmt_symbol_word_t) {
+                .level0 = 1, .duration0 = NEC_PAYLOAD_ONE_DURATION_0,
+                .level1 = 0, .duration1 = NEC_PAYLOAD_ONE_DURATION_1
+            };
+        }
+    }
+    // Append connecting codes
+    append_connecting_codes(items, &idx);
+    return idx;
+}
+
+// TX task only
+static void tx_task(void *arg) {
+    ESP_LOGI(TAG, "Initializing RMT TX on GPIO %d", EXAMPLE_IR_TX_GPIO_NUM);
+    rmt_tx_channel_config_t tx_chan_config = {
+        .gpio_num = EXAMPLE_IR_TX_GPIO_NUM,
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = EXAMPLE_IR_RESOLUTION_HZ,
+        .mem_block_symbols = 64,
+        .trans_queue_depth = 4,
+        .flags.invert_out = 1
+    };
+    rmt_channel_handle_t tx_chan = NULL;
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &tx_chan));
+
+    rmt_encoder_handle_t copy_encoder = NULL;
+    rmt_copy_encoder_config_t copy_config = {};
+    ESP_ERROR_CHECK(rmt_new_copy_encoder(&copy_config, &copy_encoder));
+
+    ESP_ERROR_CHECK(rmt_enable(tx_chan));
+
+    rmt_symbol_word_t items[300];
+    rmt_transmit_config_t tx_cfg = { .loop_count = 0 };
+
+    while (1) {
+        int num_items = build_items(items, 300);
+        printf("Sending: %s\n", tx_data);
+
+        // Send data
+        ESP_ERROR_CHECK(rmt_transmit(tx_chan, copy_encoder,
+                                     items, num_items * sizeof(rmt_symbol_word_t), &tx_cfg));
+        ESP_ERROR_CHECK(rmt_tx_wait_all_done(tx_chan, -1));
+
+        vTaskDelay(pdMS_TO_TICKS(1000)); // delay 1 second
+    }
+}
+
+void app_main(void) {
+    // Start transmitter task
+    xTaskCreate(tx_task, "tx_task", 4096, NULL, 5, NULL);
+}

@@ -1,0 +1,66 @@
+{
+  "inverter_model": "Hinen H5000 Hybrid Inverter (Modbus RTU)",
+  "protocol_reference": "Inverter.Modbus.RTU.Protocol.V1.62.20240927.xlsx",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Total PV Power (H)", "register": 1, "scaling": 0.1, "unit": "W" },
+        { "name": "Total PV Power (L)", "register": 2, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 1 (H)", "register": 6, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 1 (L)", "register": 7, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 2 (H)", "register": 11, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 2 (L)", "register": 12, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 3 (H)", "register": 16, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 3 (L)", "register": 17, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 4 (H)", "register": 21, "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 4 (L)", "register": 22, "scaling": 0.1, "unit": "W" },
+        { "name": "Total Power (H)", "register": 25, "scaling": 0.1, "unit": "W" },
+        { "name": "Total Power (L)", "register": 26, "scaling": 0.1, "unit": "W" },
+        { "name": "Battery Discharge Power (H)", "register": 102, "scaling": 0.1, "unit": "W" },
+        { "name": "Battery Discharge Power (L)", "register": 103, "scaling": 0.1, "unit": "W" },
+        { "name": "Battery Charge Power (H)", "register": 104, "scaling": 0.1, "unit": "W" },
+        { "name": "Battery Charge Power (L)", "register": 105, "scaling": 0.1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": 3, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": 8, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 3", "register": 13, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 4", "register": 18, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": 29, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": 37, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": 45, "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": 127, "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": 4, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 2", "register": 9, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 3", "register": 14, "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 4", "register": 19, "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 1", "register": 30, "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 2", "register": 38, "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 3", "register": 46, "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Current", "register": 164, "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": 132, "scaling": 0.1, "unit": "°C" },
+        { "name": "Battery Temperature", "register": 136, "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": 56, "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

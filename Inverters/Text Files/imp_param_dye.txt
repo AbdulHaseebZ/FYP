@@ -1,0 +1,8 @@
+Grid Phase Voltage A   598
+Grid Phase Voltage B   599
+Grid Phase Voltage C   600
+Total PV Power		0x0154
+PV1 Power              0x02A0
+PV1 Voltage 	       1 0x02A4
+Today Load Consumption 0x020E
+Total Load Consumption 0x020F(low byte), 0x0210(High Byte)

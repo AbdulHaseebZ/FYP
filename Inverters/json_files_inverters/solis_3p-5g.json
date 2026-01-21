@@ -1,0 +1,63 @@
+{
+  "inverter_model": "RS485_MODBUS RTU energy storage grid-connected inverter",
+  "pdf_reference": "https://github.com/user-attachments/files/16650051/RS485_MODBUS-Hybrid-BACoghlan-201811228-1854.pdf",
+  "parameters": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Total DC Output Power", "register": 33057, "scaling": 1, "unit": "W" },
+        { "name": "Active Power", "register": 33079, "scaling": 1, "unit": "W" },
+        { "name": "Reactive Power", "register": 33081, "scaling": 1, "unit": "Var" },
+        { "name": "Apparent Power", "register": 33083, "scaling": 1, "unit": "VA" },
+        { "name": "Battery Power", "register": 33149, "scaling": 1, "unit": "W" },
+        { "name": "House Load Power", "register": 33147, "scaling": 1, "unit": "W" },
+        { "name": "Bypass Load Power", "register": 33148, "scaling": 1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "DC Voltage 1", "register": 33049, "scaling": 0.1, "unit": "V" },
+        { "name": "DC Voltage 2", "register": 33051, "scaling": 0.1, "unit": "V" },
+        { "name": "DC Voltage 3", "register": 33053, "scaling": 0.1, "unit": "V" },
+        { "name": "DC Voltage 4", "register": 33055, "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 1", "register": 33073, "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 2", "register": 33074, "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 3", "register": 33075, "scaling": 0.1, "unit": "V" },
+        { "name": "DC Bus Voltage", "register": 33071, "scaling": 0.1, "unit": "V" },
+        { "name": "DC Bus Half Voltage", "register": 33072, "scaling": 0.1, "unit": "V" },
+        { "name": "LLC Bus Voltage", "register": 33136, "scaling": 0.1, "unit": "V" },
+        { "name": "Bypass AC Voltage", "register": 33137, "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": 33133, "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "DC Current 1", "register": 33050, "scaling": 0.1, "unit": "A" },
+        { "name": "DC Current 2", "register": 33052, "scaling": 0.1, "unit": "A" },
+        { "name": "DC Current 3", "register": 33054, "scaling": 0.1, "unit": "A" },
+        { "name": "DC Current 4", "register": 33056, "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 1", "register": 33076, "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 2", "register": 33077, "scaling": 0.1, "unit": "A" },
+        { "name": "Phase Current 3", "register": 33078, "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Current", "register": 33134, "scaling": 0.1, "unit": "A" },
+        { "name": "Bypass AC Current", "register": 33138, "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Charge Current Limit", "register": 33143, "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Discharge Current Limit", "register": 33144, "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {s
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": 33093, "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": 33094, "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

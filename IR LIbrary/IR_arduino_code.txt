@@ -1,0 +1,360 @@
+/*#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Haier.h>          // Haier protocol (includes YR-W02)
+
+#define IR_LED_PIN 4           // GPIO4 (D2 on NodeMCU / ESP8266)
+
+IRsend irsend(IR_LED_PIN);     // IR sender object
+IRHaierACYRW02 ac(IR_LED_PIN); // Use IRHaierACYRW02 for YR-W02 protocol (112-bit)
+
+void setup() {
+  irsend.begin();              // Initialize IR sender
+  Serial.begin(115200);
+  while (!Serial) ;            // Wait for Serial (optional)
+  Serial.println("Haier AC IR Controller Ready (YR-W02 protocol, v2.8.6)");
+  ac.begin();                  // Required for YRW02 class
+}
+
+void loop() {
+  // --- Turn the AC ON (use POWER button command) ---
+  ac.setButton(kHaierAcYrw02ButtonPower);  // Power toggle (or ON if off)
+
+  // --- Set operating mode ---
+  ac.setMode(kHaierAcYrw02Cool);           // Cool mode
+
+  // --- Set temperature (Celsius, 16-30°C) ---
+  ac.setTemp(24);                          // 24 °C
+
+  // --- Set fan speed ---
+  ac.setFan(kHaierAcYrw02FanMed);          // Medium fan
+
+  // --- Vertical swing auto (toggle to auto oscillation) ---
+  //ac.setButton(kHaierAcYrw02ButtonSwing);  // Toggles swing; library auto-targets "auto" state
+
+  // --- Health / air-purify mode ---
+  ac.setHealth(true);                      // Enable health mode
+
+  // --- Turbo OFF (use button to disable if needed) ---
+  // ac.setButton(kHaierAcYrw02ButtonTurbo); // Uncomment to toggle turbo
+
+  // --- Send the IR command (3 repeats for reliability) ---
+  ac.send();                               // First send
+  delay(100);
+  ac.send();                               // Second send
+  delay(100);
+  ac.send();                               // Third send
+
+  Serial.println("Sent: Haier AC (YR-W02) -> Cool 24°C, Fan Med, Swing Auto, Health ON");
+
+  delay(30000);  // Wait 30 seconds (Haier ignores rapid commands)
+}//*/
+
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Gree.h>  // <-- Gree library
+
+#define IR_LED_PIN 4  // ESP8266 GPIO4 (D2 on NodeMCU)
+
+IRsend irsend(IR_LED_PIN);
+IRGreeAC ac(IR_LED_PIN);  // Gree AC object
+
+void setup() {
+  irsend.begin();
+  Serial.begin(115200);
+  while (!Serial);  // Wait for Serial
+  Serial.println("Gree AC IR Sender Ready");
+}
+
+void loop() {
+  ac.on();                          // Power ON
+  ac.setMode(kGreeCool);            // Cool mode
+  ac.setTemp(18);                   // 22°C = 72°F (Gree uses Celsius internally)
+  ac.setFan(kGreeFanMed);           // Medium fan
+  ac.setSwingVertical(true, kGreeSwingAuto);  // Swing ON + Auto
+  ac.setTurbo(false);
+  ac.setLight(true);                // Optional: display ON
+  ac.setXFan(false);
+  ac.setSleep(false);
+
+  // Send the command 3 times (Gree needs repeats)
+  ac.send();
+  delay(100);
+  ac.send();
+  delay(100);
+  ac.send();
+
+  Serial.println("Sent: Gree AC -> Cool 72°F (22°C), Fan Med, Swing Auto ON");
+
+  delay(5000);  
+}//*/
+
+
+/*#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Midea.h>
+
+#define IR_LED_PIN 4
+IRsend irsend(IR_LED_PIN);
+IRMideaAC ac(IR_LED_PIN);
+
+void setup() {
+  irsend.begin();
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  ac.on();
+  ac.setMode(kMideaACCool);
+  ac.setTemp(72, false);     // 72°F
+  ac.setFan(kMideaACFanMed);
+
+  uint64_t data = ac.getRaw();
+  uint8_t* bytes = (uint8_t*)&data;
+
+  // Toggle swing: set bit 7 of byte 5
+  bytes[5] = 0x80;  // Swing ON
+
+  // SEND 3 TIMES
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+    irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+
+  Serial.println("Sent: Cool 72°F, Fan Med, Swing ON");
+
+  delay(3000);  // Wait 5 seconds before next command
+}*/
+
+
+
+
+/*#include <Arduino.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Daikin.h>
+
+const uint16_t kIrLedPin = 4;  // GPIO pin for IR LED
+IRDaikinESP ac(kIrLedPin);
+
+void setup() {
+  Serial.begin(115200);
+  delay(200);
+
+  ac.begin();  // Initialize the IR driver
+
+  // --- AC settings ---
+  ac.on();                 // Turn ON the AC
+  ac.setMode(kDaikinCool); // Mode: COOL (options: kDaikinAuto, kDaikinDry, kDaikinCool, kDaikinHeat, kDaikinFan)
+  ac.setTemp(24);          // Temperature (°C)
+  ac.setFan(kDaikinFanAuto); // Fan speed: Auto
+  ac.setSwingVertical(true); // Enable vertical swing
+  ac.setSwingHorizontal(false); // Disable horizontal swing
+
+  ac.setPowerful(false);   // Disable Turbo/Powerful mode
+  ac.setQuiet(false);      // Disable Quiet mode
+
+  // --- Send IR command ---
+  Serial.println("Sending Daikin command...");
+  ac.send();
+
+  Serial.println("Command sent!");
+}
+
+void loop() {
+  // Nothing here; only sends once at startup
+}//*/
+/*#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Haier.h>          // Haier protocol (includes YR-W02)
+
+#define IR_LED_PIN 4           // GPIO4 (D2 on NodeMCU / ESP8266)
+
+IRsend irsend(IR_LED_PIN);     // IR sender object
+IRHaierACYRW02 ac(IR_LED_PIN); // Use IRHaierACYRW02 for YR-W02 protocol (112-bit)
+
+void setup() {
+  irsend.begin();              // Initialize IR sender
+  Serial.begin(115200);
+  while (!Serial) ;            // Wait for Serial (optional)
+  Serial.println("Haier AC IR Controller Ready (YR-W02 protocol, v2.8.6)");
+  ac.begin();                  // Required for YRW02 class
+}
+
+void loop() {
+  // --- Turn the AC ON (use POWER button command) ---
+  ac.setButton(kHaierAcYrw02ButtonPower);  // Power toggle (or ON if off)
+
+  // --- Set operating mode ---
+  ac.setMode(kHaierAcYrw02Cool);           // Cool mode
+
+  // --- Set temperature (Celsius, 16-30°C) ---
+  ac.setTemp(24);                          // 24 °C
+
+  // --- Set fan speed ---
+  ac.setFan(kHaierAcYrw02FanMed);          // Medium fan
+
+  // --- Vertical swing auto (toggle to auto oscillation) ---
+  //ac.setButton(kHaierAcYrw02ButtonSwing);  // Toggles swing; library auto-targets "auto" state
+
+  // --- Health / air-purify mode ---
+  ac.setHealth(true);                      // Enable health mode
+
+  // --- Turbo OFF (use button to disable if needed) ---
+  // ac.setButton(kHaierAcYrw02ButtonTurbo); // Uncomment to toggle turbo
+
+  // --- Send the IR command (3 repeats for reliability) ---
+  ac.send();                               // First send
+  delay(100);
+  ac.send();                               // Second send
+  delay(100);
+  ac.send();                               // Third send
+
+  Serial.println("Sent: Haier AC (YR-W02) -> Cool 24°C, Fan Med, Swing Auto, Health ON");
+
+  delay(30000);  // Wait 30 seconds (Haier ignores rapid commands)
+}//*/
+
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Gree.h>  // <-- Gree library
+
+#define IR_LED_PIN 4  // ESP8266 GPIO4 (D2 on NodeMCU)
+
+IRsend irsend(IR_LED_PIN);
+IRGreeAC ac(IR_LED_PIN);  // Gree AC object
+
+void setup() {
+  irsend.begin();
+  Serial.begin(115200);
+  while (!Serial);  // Wait for Serial
+  Serial.println("Gree AC IR Sender Ready");
+}
+
+void loop() {
+  ac.on();                          // Power ON
+  ac.setMode(kGreeCool);            // Cool mode
+  ac.setTemp(18);                   // 22°C = 72°F (Gree uses Celsius internally)
+  ac.setFan(kGreeFanMed);           // Medium fan
+  ac.setSwingVertical(true, kGreeSwingAuto);  // Swing ON + Auto
+  ac.setTurbo(false);
+  ac.setLight(true);                // Optional: display ON
+  ac.setXFan(false);
+  ac.setSleep(false);
+
+  // Send the command 3 times (Gree needs repeats)
+  ac.send();
+  delay(100);
+  ac.send();
+  delay(100);
+  ac.send();
+
+  Serial.println("Sent: Gree AC -> Cool 72°F (22°C), Fan Med, Swing Auto ON");
+
+  delay(5000);  
+}//*/
+
+
+/*#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Midea.h>
+
+#define IR_LED_PIN 4
+IRsend irsend(IR_LED_PIN);
+IRMideaAC ac(IR_LED_PIN);
+
+void setup() {
+  irsend.begin();
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  ac.on();
+  ac.setMode(kMideaACCool);
+  ac.setTemp(72, false);     // 72°F
+  ac.setFan(kMideaACFanMed);
+
+  uint64_t data = ac.getRaw();
+  uint8_t* bytes = (uint8_t*)&data;
+
+  // Toggle swing: set bit 7 of byte 5
+  bytes[5] = 0x80;  // Swing ON
+
+  // SEND 3 TIMES
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+    irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+  delay(50);
+  irsend.sendMidea(data);
+
+  Serial.println("Sent: Cool 72°F, Fan Med, Swing ON");
+
+  delay(3000);  // Wait 5 seconds before next command
+}*/
+
+
+
+
+/*#include <Arduino.h>
+#include <IRremoteESP8266.h>
+#include <IRsend.h>
+#include <ir_Daikin.h>
+
+const uint16_t kIrLedPin = 4;  // GPIO pin for IR LED
+IRDaikinESP ac(kIrLedPin);
+
+void setup() {
+  Serial.begin(115200);
+  delay(200);
+
+  ac.begin();  // Initialize the IR driver
+
+  // --- AC settings ---
+  ac.on();                 // Turn ON the AC
+  ac.setMode(kDaikinCool); // Mode: COOL (options: kDaikinAuto, kDaikinDry, kDaikinCool, kDaikinHeat, kDaikinFan)
+  ac.setTemp(24);          // Temperature (°C)
+  ac.setFan(kDaikinFanAuto); // Fan speed: Auto
+  ac.setSwingVertical(true); // Enable vertical swing
+  ac.setSwingHorizontal(false); // Disable horizontal swing
+
+  ac.setPowerful(false);   // Disable Turbo/Powerful mode
+  ac.setQuiet(false);      // Disable Quiet mode
+
+  // --- Send IR command ---
+  Serial.println("Sending Daikin command...");
+  ac.send();
+
+  Serial.println("Command sent!");
+}
+
+void loop() {
+  // Nothing here; only sends once at startup
+}//*/

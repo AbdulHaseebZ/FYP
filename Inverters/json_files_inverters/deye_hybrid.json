@@ -1,0 +1,69 @@
+{
+"inverter_model": "Deye Hybrid Inverter (Modbus RTU V1.18)",
+"protocol_reference": "https://github.com/user-attachments/files/16597960/Deye.Modbus.protocol.V118.pdf",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "PV Power 1", "register": 186, "scaling": 1, "unit": "W" },
+{ "name": "PV Power 2", "register": 187, "scaling": 1, "unit": "W" },
+{ "name": "PV Power 3", "register": 188, "scaling": 1, "unit": "W" },
+{ "name": "PV Power 4", "register": 189, "scaling": 1, "unit": "W" },
+{ "name": "Output power", "register": 175, "scaling": 1, "unit": "W" },
+{ "name": "Grid Power 1", "register": 167, "scaling": 1, "unit": "W" },
+{ "name": "Grid Power 2", "register": 168, "scaling": 1, "unit": "W" },
+{ "name": "Load Power 1", "register": 176, "scaling": 1, "unit": "W" },
+{ "name": "Load Power 2", "register": 177, "scaling": 1, "unit": "W" },
+{ "name": "Battery Power", "register": 190, "scaling": 1, "unit": "W" },
+{ "name": "Today Energy (PV)", "register": 108, "scaling": 0.1, "unit": "kWh" }
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "PV Voltage 1", "register": 109, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 2", "register": 111, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 3", "register": 113, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 4", "register": 115, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 5", "register": 211, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 6", "register": 213, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 7", "register": 215, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 8", "register": 217, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 1", "register": 150, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage 2", "register": 151, "scaling": 0.1, "unit": "V" },
+{ "name": "Battery Voltage", "register": 183, "scaling": 0.01, "unit": "V" },
+{ "name": "Output Voltage 1", "register": 154, "scaling": 0.1, "unit": "V" }
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "PV Current 1", "register": 110, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 2", "register": 112, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 3", "register": 114, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 4", "register": 116, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 5", "register": 212, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 6", "register": 214, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 7", "register": 216, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 8", "register": 218, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current 1", "register": 160, "scaling": 0.01, "unit": "A" },
+{ "name": "Grid Current 2", "register": 161, "scaling": 0.01, "unit": "A" },
+{ "name": "Battery Current", "register": 191, "scaling": 0.01, "unit": "A" }
+]
+},
+{
+"category": "Temperature",
+"parameters": [
+{ "name": "Battery Temperature", "register": 182, "scaling": 0.1, "unit": "°C" },
+{ "name": "Transformer Temperature", "register": 90, "scaling": 0.1, "unit": "°C" }
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Grid Frequency", "register": 79, "scaling": 0.01, "unit": "Hz" },
+{ "name": "Inverter Frequency", "register": 193, "scaling": 0.01, "unit": "Hz" }
+]
+}
+]
+}

@@ -1,0 +1,54 @@
+{
+  "inverter_model": "Sofar G3 | 3.3-12KTLX-G3 | Three Phase | Hybrid Inverter",
+  "protocol_reference": " https://github.com/user-attachments/files/18220633/SOFAR_Modbus_Protocol_English_G3_V1.22.only.3PH.xlsx",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power 1", "register": "0x0586", "scaling": 10, "unit": "W"},
+        { "name": "PV Power 2", "register": "0x0589", "scaling": 10, "unit": "W"},
+        { "name": "Battery Power", "register": "0x0606", "scaling": 10, "unit": "W"},
+        { "name": "Grid Power", "register": "0x0485", "scaling": 10, "unit": "W"},
+        { "name": "Load Power", "register": "0x04AF", "scaling": 10, "unit": "W"}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x0584", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 2", "register": "0x0587", "scaling": 0.1, "unit": "V"},
+        { "name": "Battery Voltage", "register": "0x0604", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 1", "register": "0x048D", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 2", "register": "0x0498", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 3", "register": "0x04A3", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x0585", "scaling": 0.01, "unit": "A"},
+        { "name": "PV Current 2", "register": "0x0588", "scaling": 0.01, "unit": "A"},
+        { "name": "Battery Current", "register": "0x0605", "scaling": 0.01, "unit": "A"},
+        { "name": "Load Current 1", "register": "0x048E", "scaling": 0.01, "unit": "A"},
+        { "name": "Load Current 2", "register": "0x0499", "scaling": 0.01, "unit": "A"},
+        { "name": "Load Current 3", "register": "0x04A4", "scaling": 0.01, "unit": "A"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Room Temperature", "register": "0x0418", "scaling": 1, "unit": "°C"},
+        { "name": "Radiator Temperature", "register": "0x041A", "scaling": 1, "unit": "°C"},
+        { "name": "Inverter Temperature", "register": "0x0420", "scaling": 1, "unit": "°C"},
+        { "name": "Battery Temperature", "register": "0x0607", "scaling": 1, "unit": "°C"}
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x0484", "scaling": 0.01, "unit": "Hz"},
+        { "name": "Load UPS Frequency", "register": "0x0507", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "driver/rmt_tx.h"
+#include "driver/rmt_rx.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#define EXAMPLE_IR_RESOLUTION_HZ     1000000 // 1MHz resolution
+#define EXAMPLE_IR_TX_GPIO_NUM       21      // TX pin (changed to avoid conflict)
+#define EXAMPLE_IR_RX_GPIO_NUM1      18      // RX1 pin
+#define EXAMPLE_IR_RX_GPIO_NUM2      19      // RX2 pin
+#define EXAMPLE_IR_NEC_DECODE_MARGIN 300
+#define SYMBOL_COUNT                 68
+
+static const char *TAG = "example";
+static char tx_data[65] = {0}; // dynamic bit string
+
+// === RX callback ===
+static bool example_rmt_rx_done_callback(rmt_channel_handle_t channel,
+                                         const rmt_rx_done_event_data_t *edata,
+                                         void *user_data) {
+    BaseType_t high_task_wakeup = pdFALSE;
+    QueueHandle_t receive_queue = (QueueHandle_t)user_data;
+    xQueueSendFromISR(receive_queue, edata, &high_task_wakeup);
+    return high_task_wakeup == pdTRUE;
+}
+
+// === Decoder: RMT symbols -> bit string ===
+static int decode_symbols_to_bits(const rmt_symbol_word_t *symbols, size_t num_symbols,
+                                  char *out_bits, size_t max_bits) {
+    int bit_count = 0;
+    for (size_t i = 1; i < num_symbols; i++) { // skip leading
+        uint32_t dur1 = symbols[i].duration1;
+        if (abs((int)dur1 - 400) < EXAMPLE_IR_NEC_DECODE_MARGIN) {
+            if (bit_count < max_bits - 1) out_bits[bit_count++] = '0';
+        } else if (abs((int)dur1 - 900) < EXAMPLE_IR_NEC_DECODE_MARGIN) {
+            if (bit_count < max_bits - 1) out_bits[bit_count++] = '1';
+        }
+    }
+    out_bits[bit_count] = '\0';
+    return bit_count;
+}
+
+// === RX + TX task ===
+static void tx_task(void *arg) {
+    ESP_LOGI(TAG, "Creating RX channels for GPIO %d and %d", EXAMPLE_IR_RX_GPIO_NUM1, EXAMPLE_IR_RX_GPIO_NUM2);
+
+    // Common config
+    rmt_receive_config_t receive_config = {
+        .signal_range_min_ns = 1250,
+        .signal_range_max_ns = 22000000,
+    };
+
+    // --- RX1 ---
+    rmt_rx_channel_config_t rx_cfg1 = {
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = EXAMPLE_IR_RESOLUTION_HZ,
+        .mem_block_symbols = SYMBOL_COUNT,
+        .gpio_num = EXAMPLE_IR_RX_GPIO_NUM1,
+    };
+    rmt_channel_handle_t rx_chan1 = NULL;
+    ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_cfg1, &rx_chan1));
+
+    QueueHandle_t queue1 = xQueueCreate(4, sizeof(rmt_rx_done_event_data_t));
+    assert(queue1);
+
+    rmt_rx_event_callbacks_t cbs1 = { .on_recv_done = example_rmt_rx_done_callback };
+    ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_chan1, &cbs1, queue1));
+    ESP_ERROR_CHECK(rmt_enable(rx_chan1));
+
+    // --- RX2 ---
+    rmt_rx_channel_config_t rx_cfg2 = rx_cfg1;
+    rx_cfg2.gpio_num = EXAMPLE_IR_RX_GPIO_NUM2;
+
+    rmt_channel_handle_t rx_chan2 = NULL;
+    ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_cfg2, &rx_chan2));
+
+    QueueHandle_t queue2 = xQueueCreate(4, sizeof(rmt_rx_done_event_data_t));
+    assert(queue2);
+
+    rmt_rx_event_callbacks_t cbs2 = { .on_recv_done = example_rmt_rx_done_callback };
+    ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_chan2, &cbs2, queue2));
+    ESP_ERROR_CHECK(rmt_enable(rx_chan2));
+
+    // Buffers
+    rmt_symbol_word_t raw_symbols1[SYMBOL_COUNT];
+    rmt_symbol_word_t raw_symbols2[SYMBOL_COUNT];
+
+    // Start receiving on both
+    ESP_ERROR_CHECK(rmt_receive(rx_chan1, raw_symbols1, sizeof(raw_symbols1), &receive_config));
+    ESP_ERROR_CHECK(rmt_receive(rx_chan2, raw_symbols2, sizeof(raw_symbols2), &receive_config));
+
+    // --- TX setup ---
+    rmt_tx_channel_config_t tx_chan_config = {
+        .gpio_num = EXAMPLE_IR_TX_GPIO_NUM,
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = EXAMPLE_IR_RESOLUTION_HZ,
+        .mem_block_symbols = 64,
+        .trans_queue_depth = 4,
+        .flags.invert_out = 1
+    };
+    rmt_channel_handle_t tx_chan = NULL;
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &tx_chan));
+    ESP_ERROR_CHECK(rmt_enable(tx_chan));
+
+    // Event loop
+    rmt_rx_done_event_data_t rx_data;
+    while (1) {
+        if (xQueueReceive(queue1, &rx_data, 100 / portTICK_PERIOD_MS)) {
+            char bits[200] = {0};
+            int len = decode_symbols_to_bits(rx_data.received_symbols, rx_data.num_symbols, bits, sizeof(bits));
+            ESP_LOGI(TAG, "RX1 (GPIO%d): %d bits -> %s", EXAMPLE_IR_RX_GPIO_NUM1, len, bits);
+            ESP_ERROR_CHECK(rmt_receive(rx_chan1, raw_symbols1, sizeof(raw_symbols1), &receive_config));
+        }
+        if (xQueueReceive(queue2, &rx_data, 100 / portTICK_PERIOD_MS)) {
+            char bits[200] = {0};
+            int len = decode_symbols_to_bits(rx_data.received_symbols, rx_data.num_symbols, bits, sizeof(bits));
+            ESP_LOGI(TAG, "RX2 (GPIO%d): %d bits -> %s", EXAMPLE_IR_RX_GPIO_NUM2, len, bits);
+            ESP_ERROR_CHECK(rmt_receive(rx_chan2, raw_symbols2, sizeof(raw_symbols2), &receive_config));
+        }
+    }
+}
+
+void app_main(void) {
+    strcpy(tx_data, "0100010000000000101001000100000010000000000001010000100000001001");
+    xTaskCreate(tx_task, "tx_task", 4096, NULL, 5, NULL);
+}

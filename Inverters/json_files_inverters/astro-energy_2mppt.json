@@ -1,0 +1,44 @@
+{
+  "inverter_model": "Astro-Energy TM-L Series",
+  "protocol_reference": "",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Total Power", "register": "0x0000,0x0001,0x0005,0x0006", "scaling": 0.01, "unit": "W" },
+        { "name": "PV Power 1", "register": "0x0000,0x0005", "scaling": 0.01, "unit": "W" },
+        { "name": "PV Power 2", "register": "0x0001,0x0006", "scaling": 0.01, "unit": "W" },
+        { "name": "Grid Power", "register": "0x000F", "scaling": 0.1, "unit": "W" },
+        { "name": "Total Power", "register": "0x0014", "scaling": 0.01, "unit": "kWh" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x0000", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "0x0001", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage", "register": "0x000B", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x0005", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 2", "register": "0x0006", "scaling": 0.01, "unit": "A" },
+        { "name": "Grid Current", "register": "0x0009", "scaling": 0.01, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Grid Temperature", "register": "0x0016", "scaling": 0.01, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x000D", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

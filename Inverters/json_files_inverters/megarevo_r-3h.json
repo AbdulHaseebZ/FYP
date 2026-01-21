@@ -1,0 +1,65 @@
+{
+  "inverter_model": "Megarevo R6-15KH3 | 6.6~16.5kW | Three Phase | Hybrid Inverter",
+  "protocol_reference": "https://github.com/user-attachments/files/20112528/Hybrid.Inverter_Modbus.Protocol.xlsx",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power", "register": "0x16A2", "scaling": 1, "unit": "W"},
+        { "name": "PV Power 1", "register": "0x3132", "scaling": 1, "unit": "W"},
+        { "name": "PV Power 2", "register": "0x3135", "scaling": 1, "unit": "W"},
+        { "name": "Battery Power", "register": "0x314A", "scaling": 1, "unit": "W"},
+        { "name": "Grid Power 1", "register": "0x3112", "scaling": 1, "unit": "W"},
+        { "name": "Grid Power 2", "register": "0x3115", "scaling": 1, "unit": "W"},
+        { "name": "Grid Power 3", "register": "0x3118", "scaling": 1, "unit": "W"},
+        { "name": "Load Power 1", "register": "0x3122", "scaling": 1, "unit": "W"},
+        { "name": "Load Power 2", "register": "0x3126", "scaling": 1, "unit": "W"},
+        { "name": "Load Power 3", "register": "0x312A", "scaling": 1, "unit": "W"}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x3130", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 2", "register": "0x3133", "scaling": 0.1, "unit": "V"},
+        { "name": "Battery Voltage", "register": "0x3140", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage 1", "register": "0x3110", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage 2", "register": "0x3113", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage 3", "register": "0x3116", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 1", "register": "0x3120", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 2", "register": "0x3124", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 3", "register": "0x3128", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x3131", "scaling": 0.1, "unit": "A"},
+        { "name": "PV Current 2", "register": "0x3134", "scaling": 0.1, "unit": "A"},
+        { "name": "Battery Current", "register": "0x3141", "scaling": 0.1, "unit": "A"},
+        { "name": "Grid Current 1", "register": "0x3111", "scaling": 0.1, "unit": "A"},
+        { "name": "Grid Current 2", "register": "0x3114", "scaling": 0.1, "unit": "A"},
+        { "name": "Grid Current 3", "register": "0x3117", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 1", "register": "0x3121", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 2", "register": "0x3125", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 3", "register": "0x3129", "scaling": 0.1, "unit": "A"},
+        { "name": "Leakage Current", "register": "0x319C", "scaling": 1, "unit": "mA"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "0x311A", "scaling": 1, "unit": "°C"},
+        { "name": "Board Temperature", "register": "0x311B", "scaling": 1, "unit": "°C"},
+        { "name": "DC Temperature", "register": "0x3152", "scaling": 1, "unit": "°C"},
+        { "name": "Battery Temperature", "register": "0x3146", "scaling": 1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x3119", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

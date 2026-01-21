@@ -1,0 +1,49 @@
+{
+  "inverter_model": "Sofar String Inverter",
+  "protocol_reference": "Sofar_Modbus_Protocol",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power 1", "register": "0x000A", "scaling": 10, "unit": "W" },
+        { "name": "PV Power 2", "register": "0x000B", "scaling": 10, "unit": "W" },
+        { "name": "Output Power", "register": "0x000C", "scaling": 10, "unit": "W" },
+        { "name": "Output reactive power", "register": "0x000D", "scaling": 0.01, "unit": "kvar" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x0006", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "0x0008", "scaling": 0.1, "unit": "V" },
+        { "name": "Load Voltage 1", "register": "0x000F", "scaling": 0.1, "unit": "V" },
+        { "name": "Load Voltage 2", "register": "0x0011", "scaling": 0.1, "unit": "V" },
+        { "name": "Load Voltage 3", "register": "0x0013", "scaling": 0.1, "unit": "V" },
+        { "name": "Bus voltage", "register": "0x001D", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x0007", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 2", "register": "0x0009", "scaling": 0.01, "unit": "A" },
+        { "name": "Load Current 1", "register": "0x0010", "scaling": 0.01, "unit": "A" },
+        { "name": "Load Current 2", "register": "0x0012", "scaling": 0.01, "unit": "A" },
+        { "name": "Load Current 3", "register": "0x0014", "scaling": 0.01, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter module temperature", "register": "0x001B", "scaling": 1, "unit": "°C" },
+        { "name": "Inverter inner temperature", "register": "0x001C", "scaling": 1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid frequency", "register": "0x000E", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

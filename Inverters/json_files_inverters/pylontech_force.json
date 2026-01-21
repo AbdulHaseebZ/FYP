@@ -1,0 +1,46 @@
+{
+  "inverter_model": "Pylontech Force H1/H2/H3",
+  "protocol_reference": "https://gist.github.com/pavelmaca/170c282bdb9e20b6c624e8c7633be3b2",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Battery Remaining Capacity", "register": "5154", "scaling": 0.001, "unit": "kWh" },
+        { "name": "Today Battery Charge", "register": "5160", "scaling": 0.001, "unit": "kWh" },
+        { "name": "Today Battery Discharge", "register": "5162", "scaling": 0.001, "unit": "kWh" },
+        { "name": "Total Battery Charge", "register": "5164", "scaling": 1, "unit": "kWh" },
+        { "name": "Total Battery Discharge", "register": "5166", "scaling": 1, "unit": "kWh" },
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Battery Voltage", "register": "5123", "scaling": 0.1, "unit": "V" },
+        { "name": "Max Charging Voltage", "register": "5129", "scaling": 0.1, "unit": "V" },
+        { "name": "Min Discharging Voltage", "register": "5132", "scaling": 0.1, "unit": "V" },
+        { "name": "Max Cell Voltage", "register": "5136", "scaling": 0.001, "unit": "V" },
+        { "name": "Min Cell Voltage", "register": "5137", "scaling": 0.001, "unit": "V" },
+        { "name": "Max Module Voltage", "register": 5144, "scaling": 0.01, "unit": "V" },
+        { "name": "Min Module Voltage", "register": 5145, "scaling": 0.01, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Battery Current", "register": "5125", "scaling": 0.01, "unit": "A" },
+        { "name": "Max Charging Current", "register": "5131", "scaling": 0.01, "unit": "A" },
+        { "name": "Max Discharging Current", "register": "5134", "scaling": 0.01, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Battery Temperature", "register": "5126", "scaling": 0.1, "unit": "°C" },
+        { "name": "Max Cell Temperature", "register": "5140", "scaling": 0.1, "unit": "°C" },
+        { "name": "Min Cell Temperature", "register": "5141", "scaling": 0.1, "unit": "°C" },
+        { "name": "Max Module Temperature", "register": "5148", "scaling": 0.1, "unit": "°C" },
+        { "name": "Min Module Temperature", "register": "5149", "scaling": 0.1, "unit": "°C" }
+      ]
+    }
+  ]
+}

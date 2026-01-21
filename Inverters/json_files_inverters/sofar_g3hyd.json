@@ -1,0 +1,70 @@
+{
+  "inverter_model": "Sofar G3 | Three Phase | Hybrid Inverter",
+  "protocol_reference": "https://github.com/user-attachments/files/18220633/SOFAR_Modbus_Protocol_English_G3_V1.22.only.3PH.xlsx",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power", "register": "0x05C4", "scaling": 100, "unit": "W"},
+        { "name": "Battery Power", "register": "0x0606", "scaling": 10, "unit": "W"},
+        { "name": "Total Active Power", "register": "0x0485", "scaling": 10, "unit": "W"},
+        { "name": "Total PCC Active Power", "register": "0x0488", "scaling": 10, "unit": "W"},
+        { "name": "Phase 1 power", "register": "0x048F", "scaling": 10, "unit": "W"},
+        { "name": "Phase 2 Power", "register": "0x049A", "scaling": 10, "unit": "W"},
+        { "name": "Phase 3 Power", "register": "0x04A5", "scaling": 10, "unit": "W"},
+        { "name": "External Power", "register": "0x04AF", "scaling": 10, "unit": "W"},
+        { "name": "Today Power Production", "register": "0x0684", "scaling": 0.01, "unit": "kWh", "size": 2},
+        { "name": "Total Power Production", "register": "0x0686", "scaling": 0.1, "unit": "kWh", "size": 2},
+        { "name": "Today Load Power", "register": "0x0688", "scaling": 0.01, "unit": "kWh", "size": 2},
+        { "name": "Total Load Power", "register": "0x068A", "scaling": 0.1, "unit": "kWh", "size": 2},
+        { "name": "Today Energy Import", "register": "0x068C", "scaling": 0.01, "unit": "kWh", "size": 2},
+        { "name": "Total Energy Import", "register": "0x068E", "scaling": 0.1, "unit": "kWh", "size": 2},
+        { "name": "Today Energy Export", "register": "0x0690", "scaling": 0.01, "unit": "kWh", "size": 2},
+        { "name": "Total Energy Export", "register": "0x0692", "scaling": 0.1, "unit": "kWh", "size": 2}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x0584", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 2", "register": "0x0587", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 3", "register": "0x058A", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 4", "register": "0x058D", "scaling": 0.1, "unit": "V"},
+        { "name": "Battery Voltage", "register": "0x0604", "scaling": 0.1, "unit": "V"},
+        { "name": "Phase Voltage 1", "register": "0x048D", "scaling": 0.1, "unit": "V"},
+        { "name": "Phase Voltage 2", "register": "0x0498", "scaling": 0.1, "unit": "V"},
+        { "name": "Phase Voltage 3", "register": "0x04A3", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x0585", "scaling": 0.01, "unit": "A"},
+        { "name": "PV Current 2", "register": "0x0588", "scaling": 0.01, "unit": "A"},
+        { "name": "PV Current 3", "register": "0x058B", "scaling": 0.01, "unit": "A"},
+        { "name": "PV Current 4", "register": "0x058E", "scaling": 0.01, "unit": "A"},
+        { "name": "Battery Current", "register": "0x0605", "scaling": 0.01, "unit": "A"},
+        { "name": "Current_Output_R", "register": "0x048E", "scaling": 0.01, "unit": "A"},
+        { "name": "Current_Output_S", "register": "0x0499", "scaling": 0.01, "unit": "A"},
+        { "name": "Current_Output_T", "register": "0x04A4", "scaling": 0.01, "unit": "A"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Ambient temperature 1", "register": "0x0418", "scaling": 1, "unit": "°C"},
+        { "name": "Ambient temperature 2", "register": "0x0419", "scaling": 1, "unit": "°C"},
+        { "name": "Radiator temperature 1", "register": "0x041A", "scaling": 1, "unit": "°C"},
+        { "name": "Radiator temperature 2", "register": "0x041B", "scaling": 1, "unit": "°C"},
+        { "name": "Module temperature 1", "register": "0x0420", "scaling": 1, "unit": "°C"},
+        { "name": "Battery Temperature", "register": "0x0607", "scaling": 1, "unit": "°C"}
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x0484", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "inverter_model": "Solis 3P5~10K-4G | 5~10kW | Three Phase Inverter",
+  "protocol_reference": "https://ginlongsolis.freshdesk.com/support/solutions/articles/36000340158-modbus-communication-for-solis-inverters",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power low", "register": "3006", "scaling": 0.001, "unit": "kW"},
+        { "name": "PV Power high", "register": "3007", "scaling": 0.001, "unit": "kW"},
+        { "name": "Load Power low", "register": "3004", "scaling": 0.001, "unit": "kW"},
+        { "name": "Load Power high", "register": "3005", "scaling": 0.001, "unit": "kW"},
+        { "name": "Today Production", "register": "3014", "scaling": 0.1, "unit": "kWh"},
+        { "name": "Total Production low", "register": "3008", "scaling": 1, "unit": "kWh"},
+        { "name": "Total Production high", "register": "3009", "scaling": 1, "unit": "kWh"}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "3021", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 2", "register": "3023", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 3", "register": "3025", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 1", "register": "3033", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 2", "register": "3034", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage 3", "register": "3035", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "3022", "scaling": 0.1, "unit": "A"},
+        { "name": "PV Current 2", "register": "3024", "scaling": 0.1, "unit": "A"},
+        { "name": "PV Current 3", "register": "3026", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 1", "register": "3036", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 2", "register": "3037", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current 3", "register": "3038", "scaling": 0.1, "unit": "A"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "3041", "scaling": 0.1, "unit": "°C"}
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Load Frequency", "register": "3042", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

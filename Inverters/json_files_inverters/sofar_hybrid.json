@@ -1,0 +1,64 @@
+{
+  "inverter_model": "Sofar HYD 3000~6000-ES | ME 3000-SP (Hybrid Inverter)",
+  "protocol_reference": "https://github.com/user-attachments/files/16641716/SOFARSOLAR.ModBus-RTU.Communication.Protocol.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power", "register": "0x0215", "scaling": 10, "unit": "W"},
+        { "name": "Grid Power", "register": "0x0212", "scaling": 10, "unit": "W"},
+        { "name": "Load Power", "register": "0x0213", "scaling": 10, "unit": "W"},
+        { "name": "Battery Power", "register": "0x020D", "scaling": 10, "unit": "W"},
+        { "name": "Input/Output Power", "register": "0x0214", "scaling": 10, "unit": "W"},
+        { "name": "EPS Output Power", "register": "0x0217", "scaling": 10, "unit": "W"},
+        { "name": "Today Production", "register": "0x0218", "scaling": 0.01, "unit": "kWh"},
+        { "name": "Total Power low", "register": "0x021D", "scaling": 1, "unit": "kWh"},
+        { "name": "Total Power high", "register": "0x021C", "scaling": 1, "unit": "kWh"}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Grid Voltage 1", "register": "0x0206", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage 2", "register": "0x0208", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage 3", "register": "0x020A", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage R", "register": "0x0230", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage S", "register": "0x0232", "scaling": 0.1, "unit": "V"},
+        { "name": "Grid Voltage T", "register": "0x0234", "scaling": 0.1, "unit": "V"},
+        { "name": "Battery Voltage", "register": "0x020E", "scaling": 0.1, "unit": "V"},
+        { "name": "Bus Voltage", "register": "0x022D", "scaling": 0.1, "unit": "V"},
+        { "name": "LLC Bus Voltage", "register": "0x022E", "scaling": 0.1, "unit": "V"},
+        { "name": "EPS Output Voltage", "register": "0x0216", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Grid Current 1", "register": "0x0207", "scaling": 0.01, "unit": "A"},
+        { "name": "Grid Current 2", "register": "0x0209", "scaling": 0.01, "unit": "A"},
+        { "name": "Grid Current 3", "register": "0x020B", "scaling": 0.01, "unit": "A"},
+        { "name": "Grid Current R", "register": "0x0231", "scaling": 0.01, "unit": "A"},
+        { "name": "Grid Current S", "register": "0x0233", "scaling": 0.01, "unit": "A"},
+        { "name": "Grid Current T", "register": "0x0235", "scaling": 0.01, "unit": "A"},
+        { "name": "Battery Current", "register": "0x020F", "scaling": 0.01, "unit": "A"},
+        { "name": "Buck Current", "register": "0x022F", "scaling": 0.01, "unit": "A"},
+        { "name": "Generation Current", "register": "0x0236", "scaling": 1, "unit": "A"},
+        { "name": "DC Current", "register": "0x023B", "scaling": 1, "unit": "mA"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Battery Temperature", "register": "0x0211", "scaling": 1, "unit": "°C"},
+        { "name": "Inverter Temperature", "register": "0x0238", "scaling": 1, "unit": "°C"},
+        { "name": "Heat Sink Temperature", "register": "0x0239", "scaling": 1, "unit": "°C"},
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x020C", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

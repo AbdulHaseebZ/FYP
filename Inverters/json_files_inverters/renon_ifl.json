@@ -1,0 +1,57 @@
+{
+  "inverter_model": "Flex Renon Power IFL | Single Phase | Hybrid Inverter",
+  "protocol_reference": "Unknown (Tested)",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power 1", "register": "0x227F", "scaling": 1, "unit": "W" },
+        { "name": "PV Power 2", "register": "0x2281", "scaling": 1, "unit": "W" },
+        { "name": "Battery Power", "register": "0x314A", "scaling": 1, "unit": "W" },
+        { "name": "Grid Power", "register": "0x2285", "scaling": 1, "unit": "W" },
+        { "name": "Load Power", "register": "0x2289", "scaling": 1, "unit": "W" },
+        { "name": "Total Production", "register": "0x3165", "scaling": 0.001, "unit": "kWh" },
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x1690", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "0x1692", "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": "0x3140", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": "0x3110", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": "0x3113", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": "0x3116", "scaling": 0.1, "unit": "V" },
+        { "name": "Load Voltage 1", "register": "0x3120", "scaling": 0.1, "unit": "V" },
+        { "name": "Load Voltage 2", "register": "0x3124", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x1691", "scaling": 0.1, "unit": "A" },
+        { "name": "PV Current 2", "register": "0x1693", "scaling": 0.1, "unit": "A" },
+        { "name": "Battery Current", "register": "0x3141", "scaling": 0.01, "unit": "A" },
+        { "name": "Grid Current 1", "register": "0x3111", "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 2", "register": "0x3114", "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 3", "register": "0x3117", "scaling": 0.1, "unit": "A" },
+        { "name": "Load Current 1", "register": "0x3121", "scaling": 0.1, "unit": "A" },
+        { "name": "Load Current 2", "register": "0x3125", "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "0x16A6", "scaling": 0.1, "unit": "°C" },
+        { "name": "Environment Temperature", "register": "0x16A7", "scaling": 0.1, "unit": "°C" },
+        { "name": "Battery Temperature", "register": "0x3146", "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x3119", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

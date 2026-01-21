@@ -1,0 +1,50 @@
+{
+  "inverter_model": "Solis S6-GR1P4.6K",
+  "protocol_reference": "Solis Modbus Protocol",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Power low", "register": "3006", "scaling": 0.001, "unit": "kW"},
+        { "name": "PV Power high", "register": "3007", "scaling": 0.001, "unit": "kW"},
+        { "name": "Load Power low", "register": "3004", "scaling": 1, "unit": "W"},
+        { "name": "Load Power high", "register": "3005", "scaling": 1, "unit": "W"},
+        { "name": "Today Production", "register": "3014", "scaling": 0.1, "unit": "kWh"},
+        { "name": "Monthly Production low", "register": "3010", "scaling": 1, "unit": "kWh"},
+        { "name": "Monthly Production high", "register": "3011", "scaling": 1, "unit": "kWh"},
+        { "name": "Yearly Production low", "register": "3016", "scaling": 1, "unit": "kWh"},
+        { "name": "Yearly Production high", "register": "3017", "scaling": 1, "unit": "kWh"},
+        { "name": "Total Production low", "register": "3008", "scaling": 1, "unit": "kWh"},
+        { "name": "Total Production high", "register": "3009", "scaling": 1, "unit": "kWh"}
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "3021", "scaling": 0.1, "unit": "V"},
+        { "name": "PV Voltage 2", "register": "3023", "scaling": 0.1, "unit": "V"},
+        { "name": "Load Voltage", "register": "3035", "scaling": 0.1, "unit": "V"}
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "3022", "scaling": 0.1, "unit": "A"},
+        { "name": "PV Current 2", "register": "3024", "scaling": 0.1, "unit": "A"},
+        { "name": "Load Current", "register": "3038", "scaling": 0.1, "unit": "A"}
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "3041", "scaling": 0.1, "unit": "°C"}
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Load Frequency", "register": "3042", "scaling": 0.01, "unit": "Hz"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "esp_log.h"
+#include "driver/rmt_tx.h"
+#include "driver/rmt_rx.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <assert.h>
+
+#define EXAMPLE_IR_RESOLUTION_HZ     1000000 // 1MHz resolution, 1 tick = 1us
+#define EXAMPLE_IR_TX_GPIO_NUM      18
+#define EXAMPLE_IR_RX_GPIO_NUM      19
+#define EXAMPLE_IR_NEC_DECODE_MARGIN 300    // Tolerance for parsing RMT symbols
+#define SYMBOL_COUNT                68
+#define TX_DELAY_MS                 2000   // Delay between transmissions
+#define INITIAL_RX_PERIOD_MS        5000   // 5 seconds for initial receive-only
+
+// NEC timing specifications (in microseconds)
+#define NEC_LEADING_CODE_DURATION_0      2500
+#define NEC_LEADING_CODE_DURATION_1      1000
+#define NEC_PAYLOAD_ZERO_DURATION_0       300
+#define NEC_PAYLOAD_ZERO_DURATION_1       400
+#define NEC_PAYLOAD_ONE_DURATION_0        300
+#define NEC_PAYLOAD_ONE_DURATION_1        900
+#define NEC_CONNECTING_CODE1_DURATION_0   300
+#define NEC_CONNECTING_CODE1_DURATION_1   16300
+#define NEC_CONNECTING_CODE2_DURATION_0   2002
+#define NEC_CONNECTING_CODE2_DURATION_1   0
+
+static const char *TAG = "example";
+static char tx_data[65] = {0}; // dynamic bit string
+
+// Function to bit-reverse 4 bits
+static uint8_t bit_reverse4(uint8_t x) {
+    return ((x & 1) << 3) | ((x & 2) << 1) | ((x & 4) >> 1) | ((x & 8) >> 3);
+}
+
+// Get raw nibble value from bit string
+static uint8_t get_raw(int nib_idx) {
+    uint8_t val = 0;
+    int s = nib_idx * 4;
+    val = (tx_data[s] - '0') << 3 | (tx_data[s + 1] - '0') << 2 |
+          (tx_data[s + 2] - '0') << 1 | (tx_data[s + 3] - '0');
+    return val;
+}
+
+// Set nibble in bit string with raw value
+static void set_nibble(int nib_idx, uint8_t value) {
+    int s = nib_idx * 4;
+    for (int i = 0; i < 4; i++) {
+        tx_data[s + i] = ((value >> (3 - i)) & 1) + '0';
+    }
+}
+
+// Update checksum
+static void update_checksum() {
+    int sum = 0;
+    for (int n = 0; n < 15; n++) {
+        uint8_t raw = get_raw(n);
+        uint8_t log_val = bit_reverse4(raw);
+        sum += log_val;
+    }
+    uint8_t log_cs = sum % 16;
+    uint8_t raw_cs = bit_reverse4(log_cs);
+    set_nibble(15, raw_cs);
+}
+
+// Set temperature
+void set_temp(int temp) {
+    if (temp < 16 || temp > 30) {
+        ESP_LOGE(TAG, "Invalid temperature");
+        return;
+    }
+    uint8_t log_low = temp % 10;
+    uint8_t log_high = temp / 10;
+    uint8_t raw_low = bit_reverse4(log_low);
+    uint8_t raw_high = bit_reverse4(log_high);
+    set_nibble(0, raw_low);
+    set_nibble(1, raw_high);
+    update_checksum();
+}
+
+// Set mode
+void set_mode(const char* mode) {
+    if (strcmp(mode, "cool") == 0) {
+        set_nibble(6, 0b0100);
+        set_nibble(7, 0b0000);
+    } else if (strcmp(mode, "heat") == 0) {
+        set_nibble(6, 0b0010);
+        set_nibble(7, 0b0000);
+    } else if (strcmp(mode, "auto") == 0) {
+        set_nibble(6, 0b0001);
+        set_nibble(7, 0b0000);
+    } else if (strcmp(mode, "dry") == 0) {
+        set_nibble(6, 0b0000);
+        set_nibble(7, 0b0100);
+    } else if (strcmp(mode, "fan") == 0) {
+        set_nibble(6, 0b1000);
+        set_nibble(7, 0b0000);
+    } else {
+        ESP_LOGE(TAG, "Invalid mode");
+        return;
+    }
+    update_checksum();
+}
+
+// Set power (1 for on, 0 for off)
+void set_power(int on) {
+    uint8_t current_raw7 = get_raw(7);
+    uint8_t new_raw7 = on ? (current_raw7 & 0b0111) : (current_raw7 | 0b1000);
+    set_nibble(7, new_raw7);
+    update_checksum();
+}
+
+// Set fan (0: auto, 1: low, 2: med, 3: high)
+void set_fan(int level) {
+    uint8_t raw;
+    switch (level) {
+        case 0: raw = 0b1000; break; // auto
+        case 1: raw = 0b0001; break; // low
+        case 2: raw = 0b0010; break; // med
+        case 3: raw = 0b0100; break; // high
+        default:
+            ESP_LOGE(TAG, "Invalid fan level");
+            return;
+    }
+    set_nibble(8, raw);
+    update_checksum();
+}
+
+// Append connecting codes for transmitter
+static void append_connecting_codes(rmt_symbol_word_t *items, int *idx) {
+    items[(*idx)++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_CONNECTING_CODE1_DURATION_0,
+        .level1 = 0, .duration1 = NEC_CONNECTING_CODE1_DURATION_1
+    };
+    items[(*idx)++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_CONNECTING_CODE2_DURATION_0,
+        .level1 = 0, .duration1 = NEC_CONNECTING_CODE2_DURATION_1
+    };
+}
+
+// Build transmitter waveform
+static int build_items(rmt_symbol_word_t *items, size_t max_items) {
+    int idx = 0;
+    // Leading code
+    items[idx++] = (rmt_symbol_word_t) {
+        .level0 = 1, .duration0 = NEC_LEADING_CODE_DURATION_0,
+        .level1 = 0, .duration1 = NEC_LEADING_CODE_DURATION_1
+    };
+    // Payload bits
+    for (int i = 0; tx_data[i] != '\0'; i++) {
+        if (tx_data[i] == '0') {
+            items[idx++] = (rmt_symbol_word_t) {
+                .level0 = 1, .duration0 = NEC_PAYLOAD_ZERO_DURATION_0,
+                .level1 = 0, .duration1 = NEC_PAYLOAD_ZERO_DURATION_1
+            };
+        } else if (tx_data[i] == '1') {
+            items[idx++] = (rmt_symbol_word_t) {
+                .level0 = 1, .duration0 = NEC_PAYLOAD_ONE_DURATION_0,
+                .level1 = 0, .duration1 = NEC_PAYLOAD_ONE_DURATION_1
+            };
+        }
+    }
+    // Append connecting codes
+    append_connecting_codes(items, &idx);
+    return idx;
+}
+
+// Parse received symbols to binary string
+static void parse_rx_symbols(const rmt_symbol_word_t *symbols, size_t num_symbols, char *output) {
+    int idx = 0;
+    for (size_t i = 0; i < num_symbols && idx < 64; i++) {
+        // Check for payload zero or one based on duration1
+        if (abs(symbols[i].duration1 - NEC_PAYLOAD_ZERO_DURATION_1) < EXAMPLE_IR_NEC_DECODE_MARGIN) {
+            output[idx++] = '0';
+        } else if (abs(symbols[i].duration1 - NEC_PAYLOAD_ONE_DURATION_1) < EXAMPLE_IR_NEC_DECODE_MARGIN) {
+            output[idx++] = '1';
+        }
+    }
+    output[idx] = '\0';
+    printf("%s\n", output);
+}
+
+// RX callback
+static bool example_rmt_rx_done_callback(rmt_channel_handle_t channel,
+                                         const rmt_rx_done_event_data_t *edata,
+                                         void *user_data) {
+    BaseType_t high_task_wakeup = pdFALSE;
+    QueueHandle_t receive_queue = (QueueHandle_t)user_data;
+    xQueueSendFromISR(receive_queue, edata, &high_task_wakeup);
+    return high_task_wakeup == pdTRUE;
+}
+
+// Combined RX + TX task
+static void tx_task(void *arg) {
+    ESP_LOGI(TAG, "Create RMT RX channel");
+    rmt_rx_channel_config_t rx_channel_cfg = {
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = EXAMPLE_IR_RESOLUTION_HZ,
+        .mem_block_symbols = SYMBOL_COUNT,
+        .gpio_num = EXAMPLE_IR_RX_GPIO_NUM,
+    };
+    rmt_channel_handle_t rx_channel = NULL;
+    ESP_ERROR_CHECK(rmt_new_rx_channel(&rx_channel_cfg, &rx_channel));
+
+    // RX queue
+    QueueHandle_t receive_queue = xQueueCreate(1, sizeof(rmt_rx_done_event_data_t));
+    assert(receive_queue);
+    rmt_rx_event_callbacks_t cbs = {
+        .on_recv_done = example_rmt_rx_done_callback,
+    };
+    ESP_ERROR_CHECK(rmt_rx_register_event_callbacks(rx_channel, &cbs, receive_queue));
+
+    rmt_receive_config_t receive_config = {
+        .signal_range_min_ns = 1250,
+        .signal_range_max_ns = 22000000,
+    };
+
+    ESP_ERROR_CHECK(rmt_enable(rx_channel));
+    rmt_symbol_word_t raw_symbols[SYMBOL_COUNT];
+    rmt_rx_done_event_data_t rx_data;
+    char binary_data[65] = {0};
+
+    // Initial 5-second receive-only period
+    TickType_t start_time = xTaskGetTickCount();
+    TickType_t rx_period_ticks = pdMS_TO_TICKS(INITIAL_RX_PERIOD_MS);
+    bool initial_rx_done = false;
+
+    ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+
+    while (!initial_rx_done) {
+        if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(100)) == pdPASS) {
+            parse_rx_symbols(rx_data.received_symbols, rx_data.num_symbols, binary_data);
+            ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+        }
+        if ((xTaskGetTickCount() - start_time) >= rx_period_ticks) {
+            initial_rx_done = true;
+        }
+    }
+
+    // Initialize TX channel after initial RX period
+    ESP_LOGI(TAG, "Initializing RMT TX on GPIO %d", EXAMPLE_IR_TX_GPIO_NUM);
+    rmt_tx_channel_config_t tx_chan_config = {
+        .gpio_num = EXAMPLE_IR_TX_GPIO_NUM,
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = EXAMPLE_IR_RESOLUTION_HZ,
+        .mem_block_symbols = 64,
+        .trans_queue_depth = 4,
+        .flags.invert_out = 1
+    };
+    rmt_channel_handle_t tx_chan = NULL;
+    ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_chan_config, &tx_chan));
+
+    rmt_encoder_handle_t copy_encoder = NULL;
+    rmt_copy_encoder_config_t copy_config = {};
+    ESP_ERROR_CHECK(rmt_new_copy_encoder(&copy_config, &copy_encoder));
+
+    ESP_ERROR_CHECK(rmt_enable(tx_chan));
+
+    rmt_symbol_word_t items[300];
+    rmt_transmit_config_t tx_cfg = { .loop_count = 0 };
+
+    // Main loop: receive, print binary, send, print binary
+    while (1) {
+        if (xQueueReceive(receive_queue, &rx_data, portMAX_DELAY) == pdPASS) {
+            // Print received binary data
+            parse_rx_symbols(rx_data.received_symbols, rx_data.num_symbols, binary_data);
+
+            // Build and send TX frame
+            int num_items = build_items(items, 300);
+            printf("%s\n", tx_data); // Print sent binary data
+
+            ESP_ERROR_CHECK(rmt_transmit(tx_chan, copy_encoder,
+                                         items, num_items * sizeof(rmt_symbol_word_t), &tx_cfg));
+            ESP_ERROR_CHECK(rmt_tx_wait_all_done(tx_chan, -1));
+
+            // Restart RX
+            ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+        }
+    }
+}
+
+void app_main(void) {
+    // Initialize base command
+    strcpy(tx_data, "0100010000000000101001000100000010000000000001010000100000001001");
+
+    /*set_temp(20);
+    set_mode("auto");
+    set_fan(2); // med*/
+
+    // Create transmitter task
+    xTaskCreate(tx_task, "tx_task", 4096, NULL, 5, NULL);
+}

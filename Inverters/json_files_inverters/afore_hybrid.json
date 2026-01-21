@@ -1,0 +1,65 @@
+{
+  "inverter_model": "Afore T6 Inverter (MODBUS RTU V1.0)",
+  "protocol_reference": "https://github.com/user-attachments/files/17139137/211208.-.Afore.T6.communication.protocol.V1.0-211109.xlsx
+#": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Rated Power (Low)", "register": 7, "scaling": 1, "unit": "W" },
+        { "name": "Rated Power (High)", "register": 8, "scaling": 1, "unit": "W" },
+        { "name": "Total Reactive Power (Low)", "register": 524, "scaling": 1, "unit": "var" },
+        { "name": "Total Reactive Power (High)", "register": 525, "scaling": 1, "unit": "var" },
+        { "name": "Total Active Power (Low)", "register": 522, "scaling": 1, "unit": "W" },
+        { "name": "Total Active Power (High)", "register": 523, "scaling": 1, "unit": "W" },
+        { "name": "PV Total Power (Low)", "register": 553, "scaling": 1, "unit": "W" },
+        { "name": "PV Total Power (High)", "register": 554, "scaling": 1, "unit": "W" },
+        { "name": "PV Power 1", "register": 557, "scaling": 1, "unit": "W" },
+        { "name": "PV Power 2", "register": 560, "scaling": 1, "unit": "W" },
+        { "name": "PV Power 3", "register": 563, "scaling": 1, "unit": "W" },
+        { "name": "PV Power 4", "register": 566, "scaling": 1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Bus Voltage", "register": 500, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": 507, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": 508, "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": 509, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 1", "register": 555, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": 558, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 3", "register": 561, "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 4", "register": 564, "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Max AC Output Current (Low)", "register": 50, "scaling": 0.01, "unit": "A" },
+        { "name": "Max AC Output Current (High)", "register": 51, "scaling": 0.01, "unit": "A" },
+        { "name": "Inverter Current 1", "register": 510, "scaling": 0.01, "unit": "A" },
+        { "name": "Inverter Current 2", "register": 511, "scaling": 0.01, "unit": "A" },
+        { "name": "Inverter Current 3", "register": 512, "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 1", "register": 556, "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 2", "register": 559, "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 3", "register": 562, "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 4", "register": 565, "scaling": 0.01, "unit": "A" },
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": 2514, "scaling": 0.1, "unit": "°C" },
+        { "name": "Transformer Temperature", "register": 2515, "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency 1", "register": 513, "scaling": 0.01, "unit": "Hz" },
+        { "name": "Grid Frequency 2", "register": 514, "scaling": 0.01, "unit": "Hz" },
+        { "name": "Grid Frequency 3", "register": 515, "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

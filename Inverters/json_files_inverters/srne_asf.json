@@ -1,0 +1,61 @@
+{
+  "inverter_model": "SRNE Energy Storage Inverter (Modbus Protocol V1.96)",
+  "pdf_reference": "SRNE.Solar.Charge.Inverter.MODBUS.Protocol1.96.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Charging Current Limit", "register": "0xE001", "scaling": 0.1, "unit": "A" },
+        { "name": "PV Output Priority", "register": "0xE039", "scaling": 1, "unit": "" },
+        { "name": "Load Active Power 1", "register": "0x021B", "scaling": 1, "unit": "W" },
+        { "name": "Load Active Power 2", "register": "0x0232", "scaling": 1, "unit": "W" },
+        { "name": "Load Active Power 3", "register": "0x0233", "scaling": 1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Battery Voltage", "register": "0x0101", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": "0x0213", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": "0x022A", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": "0x022B", "scaling": 0.1, "unit": "V" },
+        { "name": "Inverter Voltage 1", "register": "0x0216", "scaling": 0.1, "unit": "V" },
+        { "name": "Inverter Voltage 2", "register": "0x022C", "scaling": 0.1, "unit": "V" },
+        { "name": "Inverter Voltage 3", "register": "0x022D", "scaling": 0.1, "unit": "V" },
+        { "name": "Output Voltage Setting", "register": "0xE208", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Battery Charging Current", "register": "0x0102", "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 1", "register": "0x0214", "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 2", "register": "0x0238", "scaling": 0.1, "unit": "A" },
+        { "name": "Grid Current 3", "register": "0x0239", "scaling": 0.1, "unit": "A" },
+        { "name": "Inverter Current 1", "register": "0x0217", "scaling": 0.1, "unit": "A" },
+        { "name": "Inverter Current 2", "register": "0x022E", "scaling": 0.1, "unit": "A" },
+        { "name": "Inverter Current 3", "register": "0x022F", "scaling": 0.1, "unit": "A" },
+        { "name": "Load Current 1", "register": "0x0219", "scaling": 0.1, "unit": "A" },
+        { "name": "Load Current 2", "register": "0x0230", "scaling": 0.1, "unit": "A" },
+        { "name": "Load Current 3", "register": "0x0231", "scaling": 0.1, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Battery Temperature", "register": "0x0103", "scaling": 0.1, "unit": "°C" },
+        { "name": "Heat Sink Temperature 1", "register": "0x0220", "scaling": 0.1, "unit": "°C" },
+        { "name": "Heat Sink Temperature 2", "register": "0x0221", "scaling": 0.1, "unit": "°C" },
+        { "name": "Ambient Temperature", "register": "0x0223", "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x0215", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Inverter Frequency", "register": "0x0218", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Output Frequency Setting", "register": "0xE209", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

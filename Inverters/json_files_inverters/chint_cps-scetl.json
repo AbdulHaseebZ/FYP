@@ -1,0 +1,62 @@
+{
+  "inverter_model": "CHINT CPS-SCE Hybrid Inverter",
+  "protocol_reference": "https://github.com/user-attachments/files/17295986/Hybrid.Modbus.Protocol.per.inverter.ibridi.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "Grid Power 1", "register": "0x1003", "scaling": 0.1, "unit": "W" },
+        { "name": "Grid Power 2", "register": "0x1008", "scaling": 0.1, "unit": "W" },
+        { "name": "Grid Power 3", "register": "0x100D", "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 1", "register": "0x1012", "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 2", "register": "0x1016", "scaling": 0.1, "unit": "W" },
+        { "name": "PV Power 3", "register": "0x101A", "scaling": 0.1, "unit": "W" },
+        { "name": "PV Total Power", "register": "0x1048", "scaling": 0.1, "unit": "W" },
+        { "name": "Battery Power", "register": "0x2009", "scaling": 0.1, "unit": "W" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "Phase Voltage 1", "register": "0x1001", "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 2", "register": "0x1006", "scaling": 0.1, "unit": "V" },
+        { "name": "Phase Voltage 3", "register": "0x100B", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 1", "register": "0x1010", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "0x1014", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 3", "register": "0x1018", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": "0x131A", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": "0x131B", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": "0x131C", "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": "0x2006", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "Phase Current 1", "register": "0x1002", "scaling": 0.01, "unit": "A" },
+        { "name": "Phase Current 2", "register": "0x1007", "scaling": 0.01, "unit": "A" },
+        { "name": "Phase Current 3", "register": "0x100C", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 1", "register": "0x1011", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 2", "register": "0x1015", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 3", "register": "0x1019", "scaling": 0.01, "unit": "A" },
+        { "name": "Battery Current", "register": "0x2007", "scaling": 0.01, "unit": "A" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature", "register": "0x101C", "scaling": 1, "unit": "°C" },
+        { "name": "Battery Temperature", "register": "0x2001", "scaling": 1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Phase Frequency 1", "register": "0x1005", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Phase Frequency 2", "register": "0x100A", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Phase Frequency 3", "register": "0x100F", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Grid Frequency", "register": "0x1338", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

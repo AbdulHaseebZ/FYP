@@ -1,0 +1,55 @@
+{
+"inverter_model": "Deye Microinverter",
+"protocol_reference": "https://github.com/user-attachments/files/16597960/Deye.Modbus.protocol.V118.pdf",
+"categories": [
+{
+"category": "Power",
+"parameters": [
+{ "name": "Output Power", "register": 86, "scaling": 0.1, "unit": "W" },
+{ "name": "Active Power", "register": , 60"scaling": 0.1, "unit": "kWh" },
+{ "name": "Reactive Power", "register": , 61"scaling": 0.1, "unit": "kWh" },
+{ "name": "Total Power", "register": , 62"scaling": 0.1, "unit": "kWh" },
+{ "name": "Grid Power", "register": , 77"scaling": 0.1, "unit": "kWh" },
+{ "name": "load Power", "register": , 84"scaling": 0.1, "unit": "kWh" },
+{ "name": "PV Power", "register": 108, "scaling": 0.1, "unit": "kWh" }
+]
+},
+{
+"category": "Voltage",
+"parameters": [
+{ "name": "PV Voltage 1", "register": 109, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 2", "register": 111, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 3", "register": 113, "scaling": 0.1, "unit": "V" },
+{ "name": "PV Voltage 4", "register": 115, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage", "register": 73, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage Upper Limit", "register": 27, "scaling": 0.1, "unit": "V" },
+{ "name": "Grid Voltage Lower Limit", "register": 28, "scaling": 0.1, "unit": "V" }
+]
+},
+{
+"category": "Current",
+"parameters": [
+{ "name": "PV Current 1", "register": 110, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 2", "register": 112, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 3", "register": 114, "scaling": 0.1, "unit": "A" },
+{ "name": "PV Current 4", "register": 116, "scaling": 0.1, "unit": "A" },
+{ "name": "Grid Current", "register": 76, "scaling": 0.1, "unit": "A" }
+]
+},
+{
+"category": "Temperature",
+"parameters": [
+{ "name": "Heat Sink Temperature", "register": 90, "scaling": 0.1, "unit": "°C" },
+{ "name": "Inverter Temperature", "register": 91, "scaling": 0.1,"unit": "°C" }
+]
+},
+{
+"category": "Frequency",
+"parameters": [
+{ "name": "Grid Frequency", "register": 79, "scaling": 0.01, "unit": "Hz" },
+{ "name": "Grid Frequency Upper Limit", "register": 29, "scaling": 0.01, "unit": "Hz" },
+{ "name": "Grid Frequency Lower Limit", "register": 30, "scaling": 0.01, "unit": "Hz" }
+]
+}
+]
+}

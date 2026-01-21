@@ -1,0 +1,82 @@
+{
+  "inverter_model": "INVT SOLAR Inverter (Modbus Protocol V1.38)",
+  "pdf_reference": "https://github.com/user-attachments/files/17638743/INVT.Modbus.July.2024.pdf",
+  "categories": [
+    {
+      "category": "Power",
+      "parameters": [
+        { "name": "PV Total Power", "register": "0x38D6", "scaling": 0.01, "unit": "kWh" },
+        { "name": "Active Power", "register": "0x381D", "scaling": 0.1, "unit": "W" },
+        { "name": "Reactive Power", "register": "0x381F", "scaling": 0.1, "unit": "VAR" },
+        { "name": "Battery Power", "register": "0x3908", "scaling": 0.1, "unit": "W" },
+        { "name": "Rated Power", "register": "0x3000", "scaling": 0.1, "unit": "kW" },
+        { "name": "Total Power generation low", "register": "0x3830", "scaling": 0.1, "unit": "kWh" },
+        { "name": "Total Power generation high", "register": "0x3831", "scaling": 0.1, "unit": "kWh" }
+      ]
+    },
+    {
+      "category": "Voltage",
+      "parameters": [
+        { "name": "PV Voltage 1", "register": "0x3836", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 2", "register": "0x3838", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 3", "register": "0x383A", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 4", "register": "0x383C", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 5", "register": "0x383E", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 6", "register": "0x3840", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 7", "register": "0x3842", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 8", "register": "0x3844", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 9", "register": "0x3846", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 10", "register": "0x3848", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 11", "register": "0x384A", "scaling": 0.1, "unit": "V" },
+        { "name": "PV Voltage 12", "register": "0x384C", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 1", "register": "0x3814", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 2", "register": "0x3815", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Voltage 3", "register": "0x3816", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Line Voltage 1", "register": "0x3811", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Line Voltage 2", "register": "0x3812", "scaling": 0.1, "unit": "V" },
+        { "name": "Grid Line Voltage 3", "register": "0x3813", "scaling": 0.1, "unit": "V" },
+        { "name": "Battery Voltage", "register": "0x390A", "scaling": 0.1, "unit": "V" }
+      ]
+    },
+    {
+      "category": "Current",
+      "parameters": [
+        { "name": "PV Current 1", "register": "0x3837", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 2", "register": "0x3839", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 3", "register": "0x383B", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 4", "register": "0x383D", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 5", "register": "0x383F", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 6", "register": "0x3841", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 7", "register": "0x3843", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 8", "register": "0x3845", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 9", "register": "0x3847", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 10", "register": "0x3849", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 11", "register": "0x384B", "scaling": 0.01, "unit": "A" },
+        { "name": "PV Current 12", "register": "0x384D", "scaling": 0.01, "unit": "A" },
+        { "name": "Grid Current 1", "register": "0x3817", "scaling": 0.01, "unit": "A" },
+        { "name": "Grid Current 2", "register": "0x3818", "scaling": 0.01, "unit": "A" },
+        { "name": "Grid Current 3", "register": "0x3819", "scaling": 0.01, "unit": "A" },
+        { "name": "Battery Current", "register": "0x390B", "scaling": 0.1, "unit": "A" },
+        { "name": "Leakage Current", "register": "0x3829", "scaling": 0.1, "unit": "mA" }
+      ]
+    },
+    {
+      "category": "Temperature",
+      "parameters": [
+        { "name": "Inverter Temperature 1", "register": "0x3822", "scaling": 0.1, "unit": "°C" },
+        { "name": "Inverter Temperature 2", "register": "0x3823", "scaling": 0.1, "unit": "°C" },
+        { "name": "Inverter Temperature 3", "register": "0x3824", "scaling": 0.1, "unit": "°C" },
+        { "name": "Ambient Temperature", "register": "0x3825", "scaling": 0.1, "unit": "°C" },
+        { "name": "Radiator Temperature", "register": "0x3826", "scaling": 0.1, "unit": "°C" },
+        { "name": "Battery Temperature", "register": "0x394D", "scaling": 0.1, "unit": "°C" }
+      ]
+    },
+    {
+      "category": "Frequency",
+      "parameters": [
+        { "name": "Grid Frequency", "register": "0x381A", "scaling": 0.01, "unit": "Hz" },
+        { "name": "Inverter Frequency", "register": "0x3926", "scaling": 0.01, "unit": "Hz" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+parameters for load management
+Grid Power (total and all phases separately)
+PV Power (Total and per string)
+Load Power (Total and per phase)
+Battery Percentage
+Battery Load
+
+todays total power consumption from grid
+todays total power consumption from solar
+what worth of money used free of cost
+how much money did he make
