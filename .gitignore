@@ -1,0 +1,11 @@
+# Ignore everything inside Home Assistant config
+home assistant/hass/config/*
+
+# But allow custom components
+!home assistant/hass/config/custom_components/
+!home assistant/hass/config/custom_components/**
+
+# Always ignore HA runtime data
+home assistant/hass/config/.storage/
+home assistant/hass/config/*.db
+home assistant/hass/config/*.log

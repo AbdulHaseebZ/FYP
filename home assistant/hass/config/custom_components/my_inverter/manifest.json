@@ -1,0 +1,13 @@
+{
+  "domain": "my_inverter",
+  "name": "ESP32 Inverter",
+  "version": "0.2.0",
+  "integration_type": "device",
+  "documentation": "",
+  "requirements": ["zeroconf>=0.132.0", "aiohttp"],
+  "dependencies": [],
+  "after_dependencies": ["http", "zeroconf"],
+  "codeowners": [],
+  "iot_class": "local_push",
+  "config_flow": true
+}

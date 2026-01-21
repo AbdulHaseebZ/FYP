@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "menu_options": {
+          "discover": "Discover Devices",
+          "manual": "Manual Setup"
+        }
+      },
+      "discover": {
+        "title": "Discover ESP32 Devices",
+        "description": "Found {count} device(s) on your network. Select one to configure:",
+        "data": {
+          "device": "Select Device"
+        }
+      },
+      "configure": {
+        "title": "Configure Device",
+        "description": "Configure: {device_id} ({device_type}) at {device_ip}",
+        "data": {
+          "device_name": "Device Name",
+          "api_key": "API Key",
+          "device_type": "Device Type"
+        }
+      },
+      "manual": {
+        "title": "Manual Device Setup",
+        "description": "Enter device configuration manually",
+        "data": {
+          "device_name": "Device Name",
+          "api_key": "API Key",
+          "device_type": "Device Type"
+        }
+      }
+    },
+    "error": {
+      "device_name_required": "Device name is required",
+      "device_name_too_long": "Device name must be 20 characters or less",
+      "api_key_required": "API key is required",
+      "api_key_too_short": "API key must be at least 4 characters",
+      "cannot_connect": "Failed to connect to device",
+      "no_devices_found": "No devices found. Make sure devices are powered on and connected.",
+      "scan_failed": "Failed to scan network"
+    },
+    "abort": {
+      "already_configured": "Device is already configured",
+      "device_not_found": "Selected device not found",
+      "scan_failed": "Network scan failed"
+    }
+  }
+}
