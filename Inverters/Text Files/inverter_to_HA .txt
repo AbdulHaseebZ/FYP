@@ -1,0 +1,270 @@
+
+
+/* ============================= INCLUDES ============================= */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_wifi.h"
+#include "esp_event.h"
+#include "esp_log.h"
+#include "esp_http_client.h"
+#include "nvs_flash.h"
+#include "esp_netif.h"
+#include "driver/uart.h"
+#include "driver/gpio.h"  
+#include "cJSON.h"
+
+/* ============================= CONFIG ============================= */
+#define WIFI_SSID       "GuestAccess"           // CHANGE
+#define WIFI_PASS       "MRSPAK@ISB"            // CHANGE
+#define HA_HOST         "10.255.0.139"          // CHANGE TO YOUR HA IP
+#define HA_PORT         8123
+#define HA_API_KEY      "123dfg"
+#define ENTRY_ID        "01KG2CGRG76SE0GPPSSVP3QSX6"    // ← paste the real 32-char entry_id here !!
+
+#define HA_STATE_PATH   "/api/my_inverter/" ENTRY_ID "/state"
+
+#define UART_NUM        UART_NUM_1
+#define TXD_PIN         GPIO_NUM_4
+#define RXD_PIN         GPIO_NUM_5
+#define BAUD_RATE       9600
+#define RX_BUF_SIZE     2048
+
+#define SEND_INTERVAL_MS   (4000)   // every 4 seconds
+
+static const char *TAG = "INVERTER_PUSH";
+/* ================================================================= */
+
+/* -------------------------- MODBUS -------------------------- */
+static void modbus_init(void)
+{
+    const uart_config_t uart_config = {
+        .baud_rate = BAUD_RATE,
+        .data_bits = UART_DATA_8_BITS,
+        .parity = UART_PARITY_DISABLE,
+        .stop_bits = UART_STOP_BITS_1,
+        .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
+        .source_clk = UART_SCLK_DEFAULT,
+    };
+    uart_driver_install(UART_NUM, RX_BUF_SIZE * 2, 0, 0, NULL, 0);
+    uart_param_config(UART_NUM, &uart_config);
+    uart_set_pin(UART_NUM, TXD_PIN, RXD_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+}
+
+static uint16_t modbus_crc16(const uint8_t *data, uint16_t len)
+{
+    uint16_t crc = 0xFFFF;
+    for (uint16_t i = 0; i < len; i++) {
+        crc ^= data[i];
+        for (uint8_t j = 0; j < 8; j++) {
+            if (crc & 1) { crc >>= 1; crc ^= 0xA001; }
+            else crc >>= 1;
+        }
+    }
+    return crc;
+}
+
+static void send_modbus_request(uint8_t slave, uint16_t addr, uint16_t n_regs)
+{
+    uint8_t req[8];
+    req[0] = slave;
+    req[1] = 0x03;
+    req[2] = (addr >> 8) & 0xFF;
+    req[3] = addr & 0xFF;
+    req[4] = (n_regs >> 8) & 0xFF;
+    req[5] = n_regs & 0xFF;
+    uint16_t crc = modbus_crc16(req, 6);
+    req[6] = crc & 0xFF;
+    req[7] = (crc >> 8) & 0xFF;
+    uart_write_bytes(UART_NUM, (const char*)req, 8);
+}
+
+static bool parse_modbus_response(uint8_t *buf, int len, uint16_t n_regs, uint16_t *out)
+{
+    if (len < 5 + 2 * n_regs) return false;
+    uint16_t crc_calc = modbus_crc16(buf, len - 2);
+    uint16_t crc_recv = (buf[len-1] << 8) | buf[len-2];
+    if (crc_calc != crc_recv) return false;
+    if (buf[0] != 0x01 || buf[1] != 0x03) return false;
+    uint8_t byte_cnt = buf[2];
+    if (len != byte_cnt + 5) return false;
+    for (int i = 0; i < n_regs; i++) {
+        out[i] = (buf[3 + 2*i] << 8) | buf[4 + 2*i];
+    }
+    return true;
+}
+
+/* -------------------------- INVERTER DATA -------------------------- */
+typedef struct {
+    int grid_voltage_a;
+    int grid_voltage_b;
+    int grid_voltage_c;
+    int total_pv_power;
+    int pv1_power;
+    int pv1_voltage;
+    int today_load_consumption;
+    uint32_t total_load_consumption;
+} inverter_t;
+
+static inverter_t inverter = {0};
+
+static void read_inverter_block(uint16_t addr, uint16_t n_regs, uint16_t *dest)
+{
+    send_modbus_request(0x01, addr, n_regs);
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    uint8_t rx_buf[RX_BUF_SIZE];
+    int len = uart_read_bytes(UART_NUM, rx_buf, RX_BUF_SIZE, pdMS_TO_TICKS(100));
+    if (len > 0 && parse_modbus_response(rx_buf, len, n_regs, dest)) {
+        ESP_LOGI(TAG, "Read 0x%04X: %d regs OK", addr, n_regs);
+    } else {
+        ESP_LOGE(TAG, "Modbus read failed for 0x%04X", addr);
+    }
+}
+
+static void update_inverter_data(void)
+{
+    uint16_t buf[10];
+
+    read_inverter_block(0x0256, 3, buf);
+    inverter.grid_voltage_a = buf[0];
+    inverter.grid_voltage_b = buf[1];
+    inverter.grid_voltage_c = buf[2];
+
+    read_inverter_block(0x0154, 1, buf);
+    inverter.total_pv_power = buf[0];
+
+    read_inverter_block(0x02A0, 1, buf);
+    inverter.pv1_power = buf[0];
+
+    read_inverter_block(0x02A4, 1, buf);
+    inverter.pv1_voltage = buf[0];
+
+    read_inverter_block(0x020E, 3, buf);
+    inverter.today_load_consumption = buf[0];
+    inverter.total_load_consumption = ((uint32_t)buf[2] << 16) | buf[1];
+}
+
+/* -------------------------- HTTP POST to HA -------------------------- */
+static void send_to_ha(void)
+{
+    cJSON *root = cJSON_CreateObject();
+    if (!root) {
+        ESP_LOGE(TAG, "cJSON_CreateObject failed");
+        return;
+    }
+
+    cJSON_AddNumberToObject(root, "grid_voltage_a", inverter.grid_voltage_a);
+    cJSON_AddNumberToObject(root, "grid_voltage_b", inverter.grid_voltage_b);
+    cJSON_AddNumberToObject(root, "grid_voltage_c", inverter.grid_voltage_c);
+    cJSON_AddNumberToObject(root, "total_pv_power", inverter.total_pv_power);
+    cJSON_AddNumberToObject(root, "pv1_power", inverter.pv1_power);
+    cJSON_AddNumberToObject(root, "pv1_voltage", inverter.pv1_voltage);
+    cJSON_AddNumberToObject(root, "today_load_consumption", inverter.today_load_consumption);
+    cJSON_AddNumberToObject(root, "total_load_consumption", (double)inverter.total_load_consumption);
+
+    char *payload = cJSON_PrintUnformatted(root);
+    if (!payload) {
+        ESP_LOGE(TAG, "cJSON_PrintUnformatted failed");
+        cJSON_Delete(root);
+        return;
+    }
+
+    char url[128];
+    snprintf(url, sizeof(url), "http://%s:%d%s", HA_HOST, HA_PORT, HA_STATE_PATH);
+
+    esp_http_client_config_t config = {
+        .url = url,
+        .method = HTTP_METHOD_POST,
+        .timeout_ms = 5000,
+    };
+
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    if (!client) {
+        ESP_LOGE(TAG, "Failed to init http client");
+        free(payload);
+        cJSON_Delete(root);
+        return;
+    }
+
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_header(client, "X-API-Key", HA_API_KEY);   // ← this matches your integration
+
+    esp_http_client_set_post_field(client, payload, strlen(payload));
+
+    esp_err_t err = esp_http_client_perform(client);
+    int status = esp_http_client_get_status_code(client);
+
+    if (err == ESP_OK && (status == 200 || status == 201)) {
+        ESP_LOGI(TAG, "Data sent to HA → OK (status %d)", status);
+    } else {
+        ESP_LOGE(TAG, "Send failed: %s - HTTP %d", esp_err_to_name(err), status);
+    }
+
+    esp_http_client_cleanup(client);
+    free(payload);
+    cJSON_Delete(root);
+}
+
+/* -------------------------- WIFI -------------------------- */
+static void wifi_event_handler(void* arg, esp_event_base_t event_base,
+                               int32_t event_id, void* event_data)
+{
+    if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
+        esp_wifi_connect();
+    } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
+        esp_wifi_connect();
+        ESP_LOGW(TAG, "WiFi disconnected → reconnecting...");
+    } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ESP_LOGI(TAG, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
+    }
+}
+
+static void wifi_init(void)
+{
+    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    esp_netif_create_default_wifi_sta();
+
+    wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+
+    ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &wifi_event_handler, NULL));
+    ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL));
+
+    wifi_config_t wifi_config = {
+        .sta = {
+            .ssid = WIFI_SSID,
+            .password = WIFI_PASS,
+        },
+    };
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+    ESP_ERROR_CHECK(esp_wifi_start());
+}
+
+/* -------------------------- MAIN -------------------------- */
+void app_main(void)
+{
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        ret = nvs_flash_init();
+    }
+    ESP_ERROR_CHECK(ret);
+
+    modbus_init();
+    wifi_init();
+
+    vTaskDelay(pdMS_TO_TICKS(10000));  // give time for WiFi
+
+    while (1) {
+        update_inverter_data();
+        send_to_ha();
+        vTaskDelay(pdMS_TO_TICKS(SEND_INTERVAL_MS));
+    }
+}
