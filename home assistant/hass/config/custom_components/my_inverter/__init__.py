@@ -5,8 +5,9 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from homeassistant.components import http
-import aiohttp  # Added for second POST
+from homeassistant.components import http, frontend
+from homeassistant.components.http import StaticPathConfig
+import aiohttp
 
 from .const import (
     DOMAIN,
@@ -18,12 +19,24 @@ from .const import (
     CONF_FAN_MODE,
     CONF_CURRENT_TEMPERATURE,
 )
-#comment
+from .ai_service import AIService
+
 _LOGGER = logging.getLogger(__name__)
+
+# Track if panel is registered
+PANEL_REGISTERED = False
+
+
+async def async_setup(hass: HomeAssistant, config: dict) -> bool:
+    """Set up the my_inverter component."""
+    hass.data.setdefault(DOMAIN, {})
+    return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up my_inverter from a config entry."""
+    global PANEL_REGISTERED
+    
     hass.data.setdefault(DOMAIN, {})
 
     coordinator = InverterCoordinator(hass, entry)
@@ -43,20 +56,32 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     if device_type == "Inverter":
         platforms.append("sensor")
-    elif device_type in ["HVAC", "IR_AC"]:  # Both use climate platform
+    elif device_type in ["HVAC", "IR_AC"]:
         platforms.append("climate")
     elif device_type == "Switch":
         platforms.append("switch")
 
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
-    # ─── Send real entry_id to device after entry creation ───
+    # Register the AI Insights panel (only once, when first device is added)
+    if not PANEL_REGISTERED:
+        await _register_panel(hass)
+        
+        # Initialize AI service (only once)
+        ai_service = AIService(hass)
+        await ai_service.async_setup()
+        hass.data[DOMAIN]["ai_service"] = ai_service
+        
+        PANEL_REGISTERED = True
+        _LOGGER.info("AI Insights panel and AI service registered")
+
+    # Send real entry_id to device after entry creation
     device_ip = entry.data.get("device_ip")
     if device_ip:
         url = f"http://{device_ip}/api/update_entry_id"
         payload = {
             "real_entry_id": entry.entry_id,
-            "api_key": entry.data[CONF_API_KEY]  # For auth on ESP side
+            "api_key": entry.data[CONF_API_KEY]
         }
         try:
             async with aiohttp.ClientSession() as session:
@@ -77,6 +102,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
+    global PANEL_REGISTERED
+    
     device_type = entry.data[CONF_DEVICE_TYPE]
     
     platforms = {
@@ -89,7 +116,63 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unloaded = await hass.config_entries.async_unload_platforms(entry, platforms)
     if unloaded:
         hass.data[DOMAIN].pop(entry.entry_id, None)
+        
+        # If this was the last device, unregister the panel and AI service
+        remaining_entries = [
+            e for e in hass.config_entries.async_entries(DOMAIN)
+            if e.entry_id != entry.entry_id
+        ]
+        
+        if not remaining_entries and PANEL_REGISTERED:
+            # Unload AI service
+            ai_service = hass.data[DOMAIN].get("ai_service")
+            if ai_service:
+                await ai_service.async_unload()
+                hass.data[DOMAIN].pop("ai_service", None)
+            
+            await _unregister_panel(hass)
+            PANEL_REGISTERED = False
+            _LOGGER.info("AI Insights panel and AI service removed (no devices remaining)")
+    
     return unloaded
+
+
+async def _register_panel(hass: HomeAssistant) -> None:
+    """Register the AI Insights custom panel in the sidebar."""
+    js_path = hass.config.path(
+        f"custom_components/{DOMAIN}/frontend/ai_summary_panel.js"
+    )
+
+    await hass.http.async_register_static_paths([
+        StaticPathConfig(
+            url_path=f"/api/{DOMAIN}/ai_summary_panel.js",
+            path=js_path,
+            cache_headers=True,
+        )
+    ])
+
+    # Register API endpoint for AI data
+    hass.http.register_view(AIDataView())
+
+    frontend.async_register_built_in_panel(
+        hass,
+        component_name="custom",
+        sidebar_title="Inverter AI Insights",
+        sidebar_icon="mdi:robot",
+        frontend_url_path="my_inverter_ai",
+        config={
+            "_panel_custom": {
+                "name": "my-inverter-ai-panel",
+                "module_url": f"/api/{DOMAIN}/ai_summary_panel.js",
+            }
+        },
+        require_admin=False,
+    )
+
+
+async def _unregister_panel(hass: HomeAssistant) -> None:
+    """Unregister the AI Insights panel from the sidebar."""
+    frontend.async_remove_panel(hass, "my_inverter_ai")
 
 
 class InverterCoordinator(DataUpdateCoordinator):
@@ -113,7 +196,7 @@ class InverterCoordinator(DataUpdateCoordinator):
         self.async_set_updated_data(self.data)
 
 
-# POST – ESP pushes state → Home Assistant
+# POST â€“ ESP pushes state â†’ Home Assistant
 class InverterStateView(http.HomeAssistantView):
     requires_auth = False
 
@@ -142,7 +225,7 @@ class InverterStateView(http.HomeAssistantView):
         return self.json({"status": "ok"})
 
 
-# GET – ESP polls for commands
+# GET â€“ ESP polls for commands
 class InverterCommandsView(http.HomeAssistantView):
     requires_auth = False
 
@@ -166,6 +249,20 @@ class InverterCommandsView(http.HomeAssistantView):
         device_data["commands"].clear()
 
         if commands:
-            _LOGGER.debug("Sent to %s → %s", entry.title, commands)
+            _LOGGER.debug("Sent to %s â†’ %s", entry.title, commands)
 
         return self.json({"commands": commands})
+
+
+# GET â€“ Frontend fetches AI summary data
+class AIDataView(http.HomeAssistantView):
+    """API endpoint to get AI summary data."""
+    
+    url = "/api/my_inverter/ai_data"
+    name = "api:my_inverter:ai_data"
+    requires_auth = True
+
+    async def get(self, request):
+        """Return the latest AI summary data."""
+        from .ai_service import AI_SUMMARY_DATA
+        return self.json(AI_SUMMARY_DATA)

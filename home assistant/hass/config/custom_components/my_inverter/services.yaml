@@ -1,0 +1,5 @@
+# custom_components/my_inverter/services.yaml
+refresh_ai_summary:
+  name: Refresh AI Summary
+  description: Manually trigger an AI summary refresh from Ollama
+  fields: {}
