@@ -1,38 +1,35 @@
 # custom_components/my_inverter/ai_service.py
-"""AI service for communicating directly with Ollama - with real device data."""
+"""AI service - Currently in DEBUG mode with filtered device data."""
 
 import logging
-from typing import Any
 from datetime import datetime, timedelta
-import aiohttp
-import json
 
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.event import async_track_time_interval
 
 from .const import DOMAIN
+from .tag_engine import TagEngine
+from .profile_manager import load_profile
 
 _LOGGER = logging.getLogger(__name__)
 
-# Global storage for the latest result shown in the panel
+# Global storage for the sidebar panel
 AI_SUMMARY_DATA = {
-    "summary": "Initializing AI service...",
+    "summary": "Initializing Debug Mode...",
     "timestamp": None,
     "error": None,
     "status": "initializing",
 }
 
-
 class AIService:
     def __init__(self, hass: HomeAssistant):
         self.hass = hass
-        self._update_interval = timedelta(minutes=1)
+        self._update_interval = timedelta(seconds=10)
         self._remove_listener = None
-        self._ollama_url = "http://localhost:11434"     # ← change if needed
-        self._ollama_model = "llama3.2:3b"              # ← your preferred model
+        self.tag_engine = TagEngine()
 
     async def async_setup(self) -> None:
-        _LOGGER.info("Setting up direct Ollama AI service")
+        _LOGGER.info("Setting up AI Service in DEBUG mode.")
         
         self.hass.services.async_register(
             DOMAIN,
@@ -47,171 +44,106 @@ class AIService:
             self._periodic_update,
             self._update_interval,
         )
-        
-        _LOGGER.info("AI service ready (direct Ollama)")
 
     async def async_unload(self) -> None:
         if self._remove_listener:
             self._remove_listener()
         self.hass.services.async_remove(DOMAIN, "refresh_ai_summary")
-        _LOGGER.info("AI service unloaded")
 
     async def _periodic_update(self, now=None):
         await self.async_refresh_summary()
 
     async def async_refresh_summary(self, call: ServiceCall = None) -> None:
         global AI_SUMMARY_DATA
-        AI_SUMMARY_DATA["status"] = "updating"
-        _LOGGER.info("Generating new AI summary...")
-
         try:
-            prompt = await self._build_prompt()
-            
-            if "No devices configured" in prompt:
-                AI_SUMMARY_DATA.update({
-                    "summary": prompt,
-                    "timestamp": datetime.now().isoformat(),
-                    "error": None,
-                    "status": "warning"
-                })
-                return
-
-            # ── Direct call to Ollama ───────────────────────────────────────
-            url = f"{self._ollama_url}/api/generate"
-            payload = {
-                "model": self._ollama_model,
-                "prompt": prompt,
-                "stream": False,
-                "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9
-                }
-            }
-
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, timeout=45) as resp:
-                    if resp.status != 200:
-                        text = await resp.text()
-                        raise Exception(f"Ollama HTTP {resp.status}: {text}")
-
-                    data = await resp.json()
-                    response_text = data.get("response", "").strip()
-
-                    if not response_text:
-                        raise Exception("Empty response from Ollama")
-
-                    AI_SUMMARY_DATA.update({
-                        "summary": response_text,
-                        "timestamp": datetime.now().isoformat(),
-                        "error": None,
-                        "status": "success"
-                    })
-                    _LOGGER.info("AI summary updated (%d chars)", len(response_text))
-
-        except aiohttp.ClientConnectionError:
-            msg = (
-                "Cannot connect to Ollama.\n\n"
-                f"Is Ollama running at {self._ollama_url}?\n"
-                "Try:  ollama serve\n\n"
-                "Or change the URL in ai_service.py if using docker/remote."
-            )
-            AI_SUMMARY_DATA.update({"summary": msg, "status": "error", "timestamp": datetime.now().isoformat()})
-
-        except Exception as e:
-            err = f"Error contacting Ollama / generating summary: {str(e)}"
-            _LOGGER.exception(err)
+            debug_text = await self._build_debug_prompt()
             AI_SUMMARY_DATA.update({
-                "summary": f"❌ {err}\n\nCheck logs and make sure the model is pulled:\nollama pull {self._ollama_model}",
+                "summary": debug_text,
+                "timestamp": datetime.now().isoformat(),
+                "error": None,
+                "status": "success"
+            })
+        except Exception as e:
+            _LOGGER.exception(f"Error generating debug text: {e}")
+            AI_SUMMARY_DATA.update({
+                "summary": f"❌ Error: {str(e)}",
                 "status": "error",
                 "timestamp": datetime.now().isoformat(),
-                "error": str(e)
             })
 
-    async def _build_prompt(self) -> str:
+    async def _build_debug_prompt(self) -> str:
         entries = self.hass.config_entries.async_entries(DOMAIN)
         if not entries:
-            return (
-                "No ESP32 devices (inverters, HVACs, switches etc.) have been added yet.\n\n"
-                "→ Go to Settings → Devices & Services → Add Integration → ESP32 Inverter"
-            )
+            return "No devices configured."
 
-        lines = []
-        total_pv = 0.0
-        total_load_today = 0.0
-        device_count = 0
+        # 1. Load Profile to get locations/names
+        profile = await self.hass.async_add_executor_job(load_profile, self.hass)
+        profile_devices = profile.get("devices", []) if profile else []
 
-        for entry in entries:
-            coordinator = self.hass.data[DOMAIN].get(entry.entry_id, {}).get("coordinator")
-            if not coordinator or not hasattr(coordinator, "data") or not coordinator.data:
-                continue
+        # 2. Define schema-based filtering
+        CLIMATE_KEYS = ["hvac_mode", "target_temperature", "fan_mode", "current_temperature"]
+        VALID_KEYS = {
+            "Inverter": ["grid_voltage_a", "grid_voltage_b", "grid_voltage_c", "total_pv_power", "total_load_power", "battery_soc"],
+            "HVAC": CLIMATE_KEYS,
+            "IR_AC": CLIMATE_KEYS,
+            "Occupancy Sensor": ["occupancy"],
+            "Switch": ["switch_state"],
+            "Shiftable Load": ["switch_state"]
+        }
 
-            data = coordinator.data
-            name = entry.data.get("device_name", f"Device-{entry.entry_id[-6:]}")
-            dtype = entry.data.get("device_type", "unknown")
-
-            device_lines = [f"Device: {name}  ({dtype})"]
-
-            if dtype == "Inverter":
-                pv = float(data.get("total_pv_power", 0))
-                total_pv += pv
-                load_today = float(data.get("today_load_consumption", 0))
-                total_load_today += load_today
-
-                device_lines.extend([
-                    f"  PV total     : {pv} W",
-                    f"  PV1          : {data.get('pv1_power', '?')} W @ {data.get('pv1_voltage', '?')} V",
-                    f"  Load today   : {load_today} kWh",
-                    f"  Grid L1/L2/L3: {data.get('grid_voltage_a','?')} / {data.get('grid_voltage_b','?')} / {data.get('grid_voltage_c','?')} V",
-                ])
-
-            elif dtype in ("HVAC", "IR_AC"):
-                device_lines.extend([
-                    f"  Mode         : {data.get('hvac_mode', 'off')}",
-                    f"  Current temp : {data.get('current_temperature', '?')} °C",
-                    f"  Target temp  : {data.get('target_temperature', '?')} °C",
-                    f"  Fan          : {data.get('fan_mode', 'auto')}",
-                ])
-
-            elif dtype == "Switch":
-                device_lines.append(f"  State        : {data.get('switch_state', 'off')}")
-
-            if len(device_lines) > 1:  # only add if we have real data
-                lines.extend(device_lines)
-                device_count += 1
-
-        if device_count == 0:
-            return "No devices are currently reporting data. Check if they are online."
-
-        # Aggregates
-        agg = []
-        if total_pv > 0:
-            agg.append(f"Total solar production right now: {total_pv:.0f} W")
-        if total_load_today > 0:
-            agg.append(f"Household consumption today: {total_load_today:.1f} kWh")
-
-        now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
-
-        prompt = f"""Current local time: {now_str}
-
-Home solar + energy status from {device_count} device(s):
-
-{'\n'.join(lines)}
-
-{'\n'.join(agg) if agg else ''}
-
-Write a short, natural, helpful summary in 4–8 sentences.
-Include:
-- overall system status (production vs consumption)
-- anything unusual (very low/high values, grid issues…)
-- 1–2 practical suggestions for the user right now
-
-Be concise, friendly and realistic. Do not hallucinate numbers."""
+        structured_data = {}
+        device_summary_lines = []
         
-        return prompt
+        for entry in entries:
+            entry_id = entry.entry_id
+            conf_name = entry.data.get("device_name")
+            dtype = entry.data.get("device_type", "Unknown")
+            
+            # Find the matching device in the profile for location
+            device_info = next((d for d in profile_devices if d["name"] == conf_name), {})
+            location = device_info.get("location") # Will be None for Inverter per your setup
+            
+            coordinator = self.hass.data[DOMAIN].get(entry_id, {}).get("coordinator")
+            if coordinator and coordinator.data:
+                # Format key: "Name (Location)" or just "Name" if Location is None
+                loc_label = f" ({location})" if location else ""
+                device_key = f"{conf_name}{loc_label}"
+                
+                # FILTERING LOGIC
+                allowed_keys = VALID_KEYS.get(dtype, [])
+                filtered_data = {k: v for k, v in coordinator.data.items() if k in allowed_keys}
+                
+                structured_data[device_key] = filtered_data
+                device_summary_lines.append(f"• {device_key}")
 
-    def get_latest_summary(self) -> dict:
-        return AI_SUMMARY_DATA.copy()
+        # 3. Generate Tags using the logic from the TagEngine
+        # We now pass the WHOLE structured_data map to the engine
+        active_tags_list = self.tag_engine.get_active_tags(self.hass, structured_data, profile)
+        active_tags_string = "\n".join([f"✅ {tag}" for tag in active_tags_list])
 
+        # 4. Format the UI Output
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        details = ""
+        for dev_name, data in structured_data.items():
+            if not data: continue
+            details += f"\n[{dev_name}]\n"
+            for k, v in data.items():
+                details += f"  {k}: {v}\n"
+
+        debug_prompt = f"""=== 🛠️ SYSTEM DEBUG MONITOR ===
+Last Updated: {now_str}
+
+[ CONFIGURED DEVICES ]
+{chr(10).join(device_summary_lines)}
+
+[ ACTIVE TAGS ]
+{active_tags_string if active_tags_string else "No active tags"}
+
+[ LIVE DEVICE STATES ]
+{details}
+================================="""
+        return debug_prompt
 
 def get_ai_service(hass: HomeAssistant) -> AIService:
     return hass.data[DOMAIN].get("ai_service")
