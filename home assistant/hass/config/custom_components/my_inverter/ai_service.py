@@ -28,7 +28,7 @@ class AIService:
         self.hass = hass
         self._update_interval = timedelta(minutes=1)
         self._remove_listener = None
-        self._ollama_url = "http://192.168.43.252:11434"     # ← change if needed
+        self._ollama_url = "http://localhost:11434"     # ← change if needed
         self._ollama_model = "llama3.2:3b"              # ← your preferred model
 
     async def async_setup(self) -> None:

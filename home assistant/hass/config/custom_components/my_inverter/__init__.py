@@ -1,13 +1,12 @@
-# custom_components/my_inverter/__init__.py
 import logging
 from typing import Any
+import aiohttp
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.components import http, frontend
 from homeassistant.components.http import StaticPathConfig
-import aiohttp
 
 from .const import (
     DOMAIN,
@@ -20,18 +19,21 @@ from .const import (
     CONF_CURRENT_TEMPERATURE,
 )
 from .ai_service import AIService
+# Import the profile manager for JSON synchronization
+from .profile_manager import (
+    load_profile,
+    remove_device_from_profile
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-# Track if panel is registered
+# Track if panel is registered globally across entries
 PANEL_REGISTERED = False
-
 
 async def async_setup(hass: HomeAssistant, config: dict) -> bool:
     """Set up the my_inverter component."""
     hass.data.setdefault(DOMAIN, {})
     return True
-
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up my_inverter from a config entry."""
@@ -46,11 +48,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "commands": [],
     }
 
-    # Per-device HTTP endpoints (supports unlimited devices)
+    # Per-device HTTP endpoints for local push/poll
     hass.http.register_view(InverterStateView(entry.entry_id))
     hass.http.register_view(InverterCommandsView(entry.entry_id))
 
-    # Load the correct platform(s)
+    # Determine which platforms to load based on device type
     platforms = []
     device_type = entry.data[CONF_DEVICE_TYPE]
     
@@ -60,14 +62,19 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         platforms.append("climate")
     elif device_type == "Switch":
         platforms.append("switch")
+    elif device_type == "Shiftable Load":
+        # Shiftable loads are currently treated as switches in HA
+        platforms.append("switch")
+    elif device_type == "Occupancy Sensor":
+        platforms.append("binary_sensor")
 
-    await hass.config_entries.async_forward_entry_setups(entry, platforms)
+    if platforms:
+        await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
-    # Register the AI Insights panel (only once, when first device is added)
+    # Register the AI Insights panel (singleton logic)
     if not PANEL_REGISTERED:
         await _register_panel(hass)
         
-        # Initialize AI service (only once)
         ai_service = AIService(hass)
         await ai_service.async_setup()
         hass.data[DOMAIN]["ai_service"] = ai_service
@@ -75,7 +82,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         PANEL_REGISTERED = True
         _LOGGER.info("AI Insights panel and AI service registered")
 
-    # Send real entry_id to device after entry creation
+    # Inform the physical device of its Permanent Entry ID
     device_ip = entry.data.get("device_ip")
     if device_ip:
         url = f"http://{device_ip}/api/update_entry_id"
@@ -88,43 +95,51 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 async with session.post(
                     url,
                     json=payload,
-                    timeout=aiohttp.ClientTimeout(total=10)
+                    timeout=aiohttp.ClientTimeout(total=5)
                 ) as resp:
                     if resp.status == 200:
-                        _LOGGER.info("Successfully sent real entry_id %s to device %s", entry.entry_id, device_ip)
-                    else:
-                        _LOGGER.warning("Device responded with status %d for real entry_id update", resp.status)
+                        _LOGGER.info("Synced entry_id %s to device at %s", entry.entry_id, device_ip)
         except Exception as e:
-            _LOGGER.error("Failed to send real entry_id to device %s: %s", device_ip, e)
+            _LOGGER.debug("Could not sync entry_id to device (likely offline): %s", e)
 
     return True
 
-
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Unload a config entry."""
+    """Unload a config entry and clean up JSON profile."""
     global PANEL_REGISTERED
     
     device_type = entry.data[CONF_DEVICE_TYPE]
+    device_name = entry.data[CONF_DEVICE_NAME]
     
+    # Map platforms for unloading
     platforms = {
         "Inverter": ["sensor"],
         "HVAC": ["climate"],
         "IR_AC": ["climate"],
         "Switch": ["switch"],
+        "Shiftable Load": ["switch"],
+        "Occupancy Sensor": ["binary_sensor"],
     }.get(device_type, [])
 
     unloaded = await hass.config_entries.async_unload_platforms(entry, platforms)
+    
     if unloaded:
+        # 1. REMOVE FROM JSON PROFILE
+        # We do this in the executor because it's a file write operation
+        await hass.async_add_executor_job(
+            remove_device_from_profile, hass, device_name
+        )
+
+        # 2. Clean up memory
         hass.data[DOMAIN].pop(entry.entry_id, None)
         
-        # If this was the last device, unregister the panel and AI service
+        # 3. Handle Sidebar Panel Cleanup
         remaining_entries = [
             e for e in hass.config_entries.async_entries(DOMAIN)
             if e.entry_id != entry.entry_id
         ]
         
         if not remaining_entries and PANEL_REGISTERED:
-            # Unload AI service
             ai_service = hass.data[DOMAIN].get("ai_service")
             if ai_service:
                 await ai_service.async_unload()
@@ -132,16 +147,13 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             
             await _unregister_panel(hass)
             PANEL_REGISTERED = False
-            _LOGGER.info("AI Insights panel and AI service removed (no devices remaining)")
+            _LOGGER.info("Removed AI Sidebar (no devices remaining)")
     
     return unloaded
 
-
 async def _register_panel(hass: HomeAssistant) -> None:
-    """Register the AI Insights custom panel in the sidebar."""
-    js_path = hass.config.path(
-        f"custom_components/{DOMAIN}/frontend/ai_summary_panel.js"
-    )
+    """Register the AI Insights custom panel."""
+    js_path = hass.config.path(f"custom_components/{DOMAIN}/frontend/ai_summary_panel.js")
 
     await hass.http.async_register_static_paths([
         StaticPathConfig(
@@ -151,7 +163,6 @@ async def _register_panel(hass: HomeAssistant) -> None:
         )
     ])
 
-    # Register API endpoint for AI data
     hass.http.register_view(AIDataView())
 
     frontend.async_register_built_in_panel(
@@ -169,15 +180,12 @@ async def _register_panel(hass: HomeAssistant) -> None:
         require_admin=False,
     )
 
-
 async def _unregister_panel(hass: HomeAssistant) -> None:
-    """Unregister the AI Insights panel from the sidebar."""
+    """Unregister the AI Insights panel."""
     frontend.async_remove_panel(hass, "my_inverter_ai")
 
-
 class InverterCoordinator(DataUpdateCoordinator):
-    """Hold all data received from the ESP."""
-
+    """Data coordinator for ESP32 devices."""
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         super().__init__(hass, _LOGGER, name=DOMAIN)
         self.entry = entry
@@ -185,19 +193,16 @@ class InverterCoordinator(DataUpdateCoordinator):
             CONF_HVAC_MODE: "off",
             CONF_TARGET_TEMPERATURE: 25.0,
             CONF_FAN_MODE: "auto",
-            CONF_CURRENT_TEMPERATURE: None,
             "switch_state": "off",
         }
 
     def update_data(self, incoming: dict[str, Any]) -> None:
-        """Merge incoming data from ESP."""
-        for key, value in incoming.items():
-            self.data[key] = value
+        """Merge incoming data and notify HA."""
+        self.data.update(incoming)
         self.async_set_updated_data(self.data)
 
-
-# POST â€“ ESP pushes state â†’ Home Assistant
 class InverterStateView(http.HomeAssistantView):
+    """Endpoint for ESP32 to push state."""
     requires_auth = False
 
     def __init__(self, entry_id: str):
@@ -206,27 +211,18 @@ class InverterStateView(http.HomeAssistantView):
         self.name = f"api:my_inverter:{entry_id}:state"
 
     async def post(self, request):
-        api_key = (
-            request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
-            or request.headers.get("X-API-Key")
-            or request.query.get("api_key")
-        )
+        api_key = request.headers.get("X-API-Key") or request.query.get("api_key")
         entry = request.app["hass"].config_entries.async_get_entry(self.entry_id)
+        
         if not entry or entry.data.get(CONF_API_KEY) != api_key:
             return self.json_message("Unauthorized", status_code=401)
 
-        try:
-            data = await request.json()
-        except ValueError:
-            return self.json_message("Invalid JSON", status_code=400)
-
-        device_data = request.app["hass"].data[DOMAIN][self.entry_id]
-        device_data["coordinator"].update_data(data)
+        data = await request.json()
+        request.app["hass"].data[DOMAIN][self.entry_id]["coordinator"].update_data(data)
         return self.json({"status": "ok"})
 
-
-# GET â€“ ESP polls for commands
 class InverterCommandsView(http.HomeAssistantView):
+    """Endpoint for ESP32 to poll for commands."""
     requires_auth = False
 
     def __init__(self, entry_id: str):
@@ -235,34 +231,23 @@ class InverterCommandsView(http.HomeAssistantView):
         self.name = f"api:my_inverter:{entry_id}:commands"
 
     async def get(self, request):
-        api_key = (
-            request.headers.get("Authorization", "").removeprefix("Bearer ").strip()
-            or request.headers.get("X-API-Key")
-            or request.query.get("api_key")
-        )
+        api_key = request.headers.get("X-API-Key") or request.query.get("api_key")
         entry = request.app["hass"].config_entries.async_get_entry(self.entry_id)
+        
         if not entry or entry.data.get(CONF_API_KEY) != api_key:
             return self.json_message("Unauthorized", status_code=401)
 
         device_data = request.app["hass"].data[DOMAIN][self.entry_id]
         commands = device_data["commands"][:]
         device_data["commands"].clear()
-
-        if commands:
-            _LOGGER.debug("Sent to %s â†’ %s", entry.title, commands)
-
         return self.json({"commands": commands})
 
-
-# GET â€“ Frontend fetches AI summary data
 class AIDataView(http.HomeAssistantView):
-    """API endpoint to get AI summary data."""
-    
+    """Endpoint for the Sidebar to fetch AI data."""
     url = "/api/my_inverter/ai_data"
     name = "api:my_inverter:ai_data"
     requires_auth = True
 
     async def get(self, request):
-        """Return the latest AI summary data."""
         from .ai_service import AI_SUMMARY_DATA
         return self.json(AI_SUMMARY_DATA)
