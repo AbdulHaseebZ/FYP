@@ -1,4 +1,5 @@
 import logging
+import os
 from typing import Any
 import aiohttp
 
@@ -24,6 +25,7 @@ from .profile_manager import (
     load_profile,
     remove_device_from_profile
 )
+# The rule_matcher is imported within ai_service.py, no need to import here
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -72,15 +74,33 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         await hass.config_entries.async_forward_entry_setups(entry, platforms)
 
     # Register the AI Insights panel (singleton logic)
-    if not PANEL_REGISTERED:
-        await _register_panel(hass)
-        
-        ai_service = AIService(hass)
-        await ai_service.async_setup()
-        hass.data[DOMAIN]["ai_service"] = ai_service
-        
-        PANEL_REGISTERED = True
-        _LOGGER.info("AI Insights panel and AI service registered")
+    # Only setup once, but check if AI service is already running
+    if "ai_service" not in hass.data[DOMAIN]:
+        try:
+            _LOGGER.info("🚀 Setting up AI Insights panel and AI service...")
+            
+            if not PANEL_REGISTERED:
+                try:
+                    await _register_panel(hass)
+                    _LOGGER.info("✅ AI Insights panel registered")
+                    PANEL_REGISTERED = True
+                except ValueError as e:
+                    if "Overwriting panel" in str(e):
+                        _LOGGER.info("⚠️ Panel already exists, that's okay")
+                        PANEL_REGISTERED = True
+                    else:
+                        _LOGGER.warning(f"⚠️ Panel registration issue: {e}")
+            
+            # Setup AI service
+            ai_service = AIService(hass)
+            await ai_service.async_setup()
+            hass.data[DOMAIN]["ai_service"] = ai_service
+            
+            _LOGGER.info("✅ AI service initialized with rule matching engine")
+        except Exception as e:
+            _LOGGER.error(f"❌ Failed to setup AI service: {e}", exc_info=True)
+    else:
+        _LOGGER.debug("ℹ️ AI service already running, skipping setup")
 
     # Inform the physical device of its Permanent Entry ID
     device_ip = entry.data.get("device_ip")
@@ -98,9 +118,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     timeout=aiohttp.ClientTimeout(total=5)
                 ) as resp:
                     if resp.status == 200:
-                        _LOGGER.info("Synced entry_id %s to device at %s", entry.entry_id, device_ip)
+                        _LOGGER.info("✅ Synced entry_id %s to device at %s", entry.entry_id, device_ip)
         except Exception as e:
-            _LOGGER.debug("Could not sync entry_id to device (likely offline): %s", e)
+            _LOGGER.debug("⚠️ Could not sync entry_id to device (likely offline): %s", e)
 
     return True
 
@@ -147,7 +167,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             
             await _unregister_panel(hass)
             PANEL_REGISTERED = False
-            _LOGGER.info("Removed AI Sidebar (no devices remaining)")
+            _LOGGER.info("🗑️ Removed AI Sidebar (no devices remaining)")
     
     return unloaded
 
@@ -155,30 +175,48 @@ async def _register_panel(hass: HomeAssistant) -> None:
     """Register the AI Insights custom panel."""
     js_path = hass.config.path(f"custom_components/{DOMAIN}/frontend/ai_summary_panel.js")
 
-    await hass.http.async_register_static_paths([
-        StaticPathConfig(
-            url_path=f"/api/{DOMAIN}/ai_summary_panel.js",
-            path=js_path,
-            cache_headers=True,
+    # Check if the JS file exists
+    if os.path.exists(js_path):
+        try:
+            await hass.http.async_register_static_paths([
+                StaticPathConfig(
+                    url_path=f"/api/{DOMAIN}/ai_summary_panel.js",
+                    path=js_path,
+                    cache_headers=True,
+                )
+            ])
+            _LOGGER.debug(f"✅ Registered static path for AI panel JS")
+        except Exception as e:
+            _LOGGER.warning(f"⚠️ Could not register static path: {e}")
+    else:
+        _LOGGER.warning(f"⚠️ AI panel JS file not found at {js_path}. Panel will not display.")
+
+    # Register the data endpoint
+    try:
+        hass.http.register_view(AIDataView())
+        _LOGGER.debug(f"✅ Registered AI data endpoint")
+    except Exception as e:
+        _LOGGER.warning(f"⚠️ Could not register data endpoint: {e}")
+
+    # Register the panel
+    try:
+        frontend.async_register_built_in_panel(
+            hass,
+            component_name="custom",
+            sidebar_title="Inverter AI Insights",
+            sidebar_icon="mdi:robot",
+            frontend_url_path="my_inverter_ai",
+            config={
+                "_panel_custom": {
+                    "name": "my-inverter-ai-panel",
+                    "module_url": f"/api/{DOMAIN}/ai_summary_panel.js",
+                }
+            },
+            require_admin=False,
         )
-    ])
-
-    hass.http.register_view(AIDataView())
-
-    frontend.async_register_built_in_panel(
-        hass,
-        component_name="custom",
-        sidebar_title="Inverter AI Insights",
-        sidebar_icon="mdi:robot",
-        frontend_url_path="my_inverter_ai",
-        config={
-            "_panel_custom": {
-                "name": "my-inverter-ai-panel",
-                "module_url": f"/api/{DOMAIN}/ai_summary_panel.js",
-            }
-        },
-        require_admin=False,
-    )
+        _LOGGER.info(f"✅ Registered AI Insights sidebar panel")
+    except Exception as e:
+        _LOGGER.error(f"❌ Failed to register panel: {e}")
 
 async def _unregister_panel(hass: HomeAssistant) -> None:
     """Unregister the AI Insights panel."""
@@ -189,12 +227,43 @@ class InverterCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         super().__init__(hass, _LOGGER, name=DOMAIN)
         self.entry = entry
-        self.data: dict[str, Any] = {
-            CONF_HVAC_MODE: "off",
-            CONF_TARGET_TEMPERATURE: 25.0,
-            CONF_FAN_MODE: "auto",
-            "switch_state": "off",
-        }
+        
+        # Initialize data structure based on device type
+        device_type = entry.data.get(CONF_DEVICE_TYPE, "Unknown")
+        
+        if device_type == "Inverter":
+            # Inverter-specific data
+            self.data: dict[str, Any] = {
+                "grid_voltage_a": 0.0,
+                "grid_voltage_b": 0.0,
+                "grid_voltage_c": 0.0,
+                "total_pv_power": 0.0,
+                "total_load_power": 0.0,
+                "battery_soc": 0.0,
+            }
+        elif device_type in ["HVAC", "IR_AC"]:
+            # Climate device data
+            self.data: dict[str, Any] = {
+                CONF_HVAC_MODE: "off",
+                CONF_TARGET_TEMPERATURE: 25.0,
+                CONF_FAN_MODE: "auto",
+                CONF_CURRENT_TEMPERATURE: 25.0,
+            }
+        elif device_type == "Occupancy Sensor":
+            # Occupancy sensor data
+            self.data: dict[str, Any] = {
+                "occupancy": False,
+            }
+        elif device_type in ["Switch", "Shiftable Load"]:
+            # Switch/load data
+            self.data: dict[str, Any] = {
+                "switch_state": "off",
+            }
+        else:
+            # Generic fallback
+            self.data: dict[str, Any] = {
+                "state": "unknown",
+            }
 
     def update_data(self, incoming: dict[str, Any]) -> None:
         """Merge incoming data and notify HA."""
